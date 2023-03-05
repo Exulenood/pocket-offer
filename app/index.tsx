@@ -1,34 +1,14 @@
-import {
-  FredokaOne_400Regular,
-  useFonts,
-} from '@expo-google-fonts/fredoka-one';
-import {
-  NotoSans_400Regular,
-  NotoSans_600SemiBold,
-  NotoSans_800ExtraBold,
-} from '@expo-google-fonts/noto-sans';
+import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import Header from '../components/Header';
-import { colors } from '../styles/constants';
-
-// import { colors } from './styles/constants';
+import { colors } from './_layout';
+import Header from './Header';
 
 export default function Index() {
   const [userName, setUserName] = useState('');
   const [userPassword, setUserPassword] = useState('');
-
-  const [fontsLoaded] = useFonts({
-    FredokaOne_400Regular,
-    NotoSans_400Regular,
-    NotoSans_800ExtraBold,
-    NotoSans_600SemiBold,
-  });
-
-  if (!fontsLoaded) {
-    return null;
-  }
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
@@ -51,11 +31,18 @@ export default function Index() {
           onChangeText={() => setUserPassword(userPassword)}
         />
       </View>
-      <View style={styles.loginButton}>
-        <Pressable>
-          <Text style={styles.loginText}>LOGIN</Text>
-        </Pressable>
-      </View>
+      <Pressable
+        onPress={() => router.push('/screens/home')}
+        style={styles.loginButton}
+      >
+        <Text style={styles.loginText}>LOGIN</Text>
+      </Pressable>
+      <Pressable
+        onPress={() => router.push('/screens/registration')}
+        style={styles.registerButton}
+      >
+        <Text style={styles.registerText}>Sign up as new user</Text>
+      </Pressable>
     </View>
   );
 }
@@ -64,11 +51,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    marginTop: 80,
+    marginTop: 140,
     alignItems: 'center',
   },
   logo: {
-    marginBottom: 180,
+    marginBottom: 120,
   },
   loginInputView: {
     backgroundColor: colors.patternColorB,
@@ -94,5 +81,17 @@ const styles = StyleSheet.create({
     fontFamily: 'NotoSans_600SemiBold',
     color: '#FFF',
     fontSize: 20,
+  },
+  registerButton: {
+    marginTop: 50,
+    width: '60%',
+    height: 30,
+    backgroundColor: colors.patternColorA,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  registerText: {
+    fontFamily: 'NotoSans_600SemiBold',
+    fontSize: 15,
   },
 });

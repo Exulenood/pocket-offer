@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 import React from 'react';
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
-import { colors } from '../styles/constants';
+import { colors } from './_layout';
 
 type Props = {
   label: string;
