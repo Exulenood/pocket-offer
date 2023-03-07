@@ -12,7 +12,7 @@ import {
 import { colors } from '../_layout';
 import Header from '../Header';
 
-type RegisterResponseBody =
+type RegDataResponseBody =
   | {
       errors: {
         message: string;
@@ -32,7 +32,7 @@ export default function Registration() {
       { text: 'back to login', onPress: () => router.push('../') },
     ]);
 
-  async function postNewUser(userName: string, password: string) {
+  async function createNewUser(userName: string, password: string) {
     const response = await fetch(`${apiUrl}/register`, {
       method: 'POST',
       headers: {
@@ -43,7 +43,7 @@ export default function Registration() {
         password: password,
       }),
     });
-    const data = await response.json();
+    const data: RegDataResponseBody = await response.json();
     if ('errors' in data) {
       setErrors(data.errors);
       return;
@@ -83,7 +83,7 @@ export default function Registration() {
       ))}
       <Pressable
         style={styles.signUpButton}
-        onPress={() => postNewUser(newUserName, newPassword)}
+        onPress={() => createNewUser(newUserName, newPassword)}
       >
         <Text style={styles.signUpButtonText}>SIGN UP AS NEW USER</Text>
       </Pressable>
@@ -136,18 +136,6 @@ const styles = StyleSheet.create({
     color: '#9e3030',
     fontSize: 15,
     textAlign: 'center',
-    width: '60%',
+    width: '70%',
   },
 });
-
-// {
-//   const data = postNewUser(newUserName, newPassword);
-//   console.log(data);
-
-//   if ('errors' in data) {
-//     return;
-//   }
-//   Toast.show('You have signed up successfully!', {
-//     duration: Toast.durations.SHORT,
-//   });
-// }}

@@ -1,14 +1,60 @@
 import { useRouter } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { colors } from './_layout';
 import Header from './Header';
 
+type LoginDataResponseBody =
+  | {
+      errors: {
+        message: string;
+      }[];
+    }
+  | { user: { username: string; token: string } };
+
 export default function Index() {
-  const [userName, setUserName] = useState('');
-  const [userPassword, setUserPassword] = useState('');
   const router = useRouter();
+  const [logUserName, setLogUserName] = useState<string>('');
+  const [logPassword, setLogPassword] = useState<string>('');
+  const [errors, setErrors] = useState<{ message: string }[]>([]);
+  const apiUrl: string = 'http://192.168.0.141:3000/api';
+
+  async function attemtLogin(userName: string, password: string) {
+    const response = await fetch(`${apiUrl}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userName: userName,
+        password: password,
+      }),
+    });
+    const data: LoginDataResponseBody = await response.json();
+    if ('errors' in data) {
+      setErrors(data.errors);
+      return;
+    }
+
+    await SecureStore.deleteItemAsync('loggedInAs');
+    await SecureStore.deleteItemAsync('sessionToken');
+    await SecureStore.deleteItemAsync('sessionSecret');
+
+    await SecureStore.setItemAsync('loggedInAs', data.user.username);
+    await SecureStore.setItemAsync('sessionToken', data.user.token);
+
+    const loggedInAs = await SecureStore.getItemAsync('loggedInAs');
+    const sessionToken = await SecureStore.getItemAsync('sessionToken');
+
+    if (loggedInAs === data.user.username && sessionToken === data.user.token) {
+      router.push(`/screens/components/Authorization?reroute=Home`);
+    } else {
+      console.log('failed to create client side session');
+      return;
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -20,7 +66,8 @@ export default function Index() {
         <TextInput
           style={styles.loginTextInput}
           placeholder="Username"
-          onChangeText={() => setUserName(userName)}
+          onChangeText={setLogUserName}
+          value={logUserName}
         />
       </View>
       <View style={styles.loginInputView}>
@@ -28,20 +75,32 @@ export default function Index() {
           style={styles.loginTextInput}
           placeholder="Password"
           secureTextEntry={true}
-          onChangeText={() => setUserPassword(userPassword)}
+          onChangeText={setLogPassword}
+          value={logPassword}
         />
       </View>
+      {errors.map((error) => (
+        <Text style={styles.errorMessageText} key={`error-${error.message}`}>
+          {error.message}
+        </Text>
+      ))}
       <Pressable
-        onPress={() => router.push('/screens/home')}
         style={styles.loginButton}
+        onPress={() => attemtLogin(logUserName, logPassword)}
       >
         <Text style={styles.loginText}>LOGIN</Text>
       </Pressable>
       <Pressable
-        onPress={() => router.push('/screens/registration')}
         style={styles.registerButton}
+        onPress={() => router.push('/screens/Registration')}
       >
         <Text style={styles.registerText}>Sign up as new user</Text>
+      </Pressable>
+      <Pressable
+        style={styles.registerButton}
+        onPress={() => router.push('/screens/Home')}
+      >
+        <Text style={styles.loginText}>Loginbypass</Text>
       </Pressable>
     </View>
   );
@@ -55,7 +114,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    marginBottom: 120,
+    marginBottom: 80,
   },
   loginInputView: {
     backgroundColor: colors.patternColorB,
@@ -93,5 +152,13 @@ const styles = StyleSheet.create({
   registerText: {
     fontFamily: 'NotoSans_600SemiBold',
     fontSize: 15,
+    color: '#FFF',
+  },
+  errorMessageText: {
+    fontFamily: 'NotoSans_600SemiBold',
+    color: '#9e3030',
+    fontSize: 15,
+    textAlign: 'center',
+    width: '70%',
   },
 });
