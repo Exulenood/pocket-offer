@@ -57,8 +57,10 @@ export default function Registration() {
       <View style={styles.logo}>
         <Header label="POCKET OFFER" />
       </View>
-      <Text style={styles.registrationText}>WELCOME!</Text>
-      <Text style={styles.registrationText}>Please sign up here:</Text>
+      <View style={styles.welcomeContainer}>
+        <Text style={styles.registrationText}>WELCOME!</Text>
+        <Text style={styles.registrationText}>Please sign up here:</Text>
+      </View>
       <View style={styles.regInputView}>
         <TextInput
           style={styles.regTextInput}
@@ -101,9 +103,15 @@ const styles = StyleSheet.create({
   logo: {
     marginBottom: 5,
   },
+  welcomeContainer: {
+    alignItems: 'center',
+    marginTop: 30,
+    marginBottom: 50,
+  },
   registrationText: {
     fontFamily: 'NotoSans_600SemiBold',
     fontSize: 30,
+    color: colors.patternColorD,
   },
   regInputView: {
     backgroundColor: colors.patternColorB,
@@ -118,7 +126,7 @@ const styles = StyleSheet.create({
     height: 50,
   },
   signUpButton: {
-    marginTop: 50,
+    marginTop: 40,
     width: '60%',
     height: 40,
     backgroundColor: colors.patternColorA,

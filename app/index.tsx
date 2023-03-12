@@ -49,7 +49,7 @@ export default function Index() {
     const sessionToken = await SecureStore.getItemAsync('sessionToken');
 
     if (loggedInAs === data.user.username && sessionToken === data.user.token) {
-      router.push(`/screens/components/Authorization?reroute=Home`);
+      router.replace(`/loginAndAuth/authorization?reroute=../screens/home`);
     } else {
       console.log('failed to create client side session');
       return;
@@ -92,15 +92,9 @@ export default function Index() {
       </Pressable>
       <Pressable
         style={styles.registerButton}
-        onPress={() => router.push('/screens/Registration')}
+        onPress={() => router.push('/loginAndAuth/registration')}
       >
         <Text style={styles.registerText}>Sign up as new user</Text>
-      </Pressable>
-      <Pressable
-        style={styles.registerButton}
-        onPress={() => router.push('/screens/Home')}
-      >
-        <Text style={styles.loginText}>Loginbypass</Text>
       </Pressable>
     </View>
   );

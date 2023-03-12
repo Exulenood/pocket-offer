@@ -7,7 +7,7 @@ import {
   NotoSans_600SemiBold,
   NotoSans_800ExtraBold,
 } from '@expo-google-fonts/noto-sans';
-import { Slot, SplashScreen } from 'expo-router';
+import { Slot, SplashScreen, Stack } from 'expo-router';
 
 export const colors = {
   patternColorA: '#4761C2',
@@ -29,5 +29,23 @@ export default function Layout() {
     return <SplashScreen />;
   }
 
-  return <Slot />;
+  return (
+    <Stack>
+      <Stack.Screen
+        name="newOffer"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="selectCustomer"
+        options={{
+          presentation: 'modal',
+          title: 'Select Customer',
+          animation: 'slide_from_right',
+          headerBackVisible: false,
+        }}
+      />
+    </Stack>
+  );
 }
