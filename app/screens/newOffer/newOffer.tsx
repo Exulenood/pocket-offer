@@ -1,6 +1,7 @@
+/* eslint-disable no-restricted-syntax */
 import { Link, useRouter, useSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   BackHandler,
@@ -12,15 +13,17 @@ import {
 } from 'react-native';
 import { colors } from '../../_layout';
 
-// import NewOfferCustomerPreview from './components/newOfferCustomerPreview';
+type Clientdata = { id: string; name: string; locality: string };
 
 export default function NewOffer() {
-  let { customer } = useSearchParams();
-  if (!customer) {
-    customer = 'Testcustomer';
-  }
-
+  const [selectedClientData, setSelectedClientData] = useState<Clientdata>({
+    id: '-',
+    name: 'Please select client',
+    locality: '-',
+  });
+  const { client } = useSearchParams();
   const router = useRouter();
+
   useEffect(() => {
     const backAction = () => {
       Alert.alert(
@@ -32,7 +35,7 @@ export default function NewOffer() {
             onPress: () => null,
             style: 'cancel',
           },
-          { text: 'YES', onPress: () => router.push('../Home') },
+          { text: 'YES', onPress: () => router.push('../home') },
         ],
       );
       return true;
@@ -45,36 +48,43 @@ export default function NewOffer() {
 
     return () => backHandler.remove();
   }, []);
+  useEffect(() => {
+    if (client) {
+      setSelectedClientData(JSON.parse(client));
+    }
+  }, [client]);
 
   return (
     <View style={styles.container}>
       <View style={styles.headContainer}>
         <Text style={styles.headText}>Create a new offer</Text>
       </View>
-      <View style={styles.selectCustomerContainer}>
-        <Text style={styles.lableText}>Please select a customer:</Text>
+      <View style={styles.selectClientContainer}>
+        <Text style={styles.lableText}>Please select a client:</Text>
         <View style={styles.customerPreviewcontainer}>
           <View style={styles.customerPreviewSubcontainer}>
             <View style={styles.informationContainer}>
-              <View style={styles.customerNameContainer}>
-                <Text style={styles.infoTextCustomerName}>{customer}</Text>
+              <View style={styles.clientNameContainer}>
+                <Text style={styles.infoTextClientName}>
+                  {selectedClientData.name}
+                </Text>
               </View>
               <View style={styles.idAndLocationContainer}>
                 <View style={styles.locationContainer}>
                   <Text style={styles.infoTextAdditional}>
-                    9999 Testlocality
+                    {selectedClientData.locality}
                   </Text>
                 </View>
                 <View style={styles.idContainer}>
                   <Text style={styles.infoTextAdditional}>
-                    Customer Id: 255893364
+                    {`Client Id: ${selectedClientData.id}`}
                   </Text>
                 </View>
               </View>
             </View>
             <View style={styles.SelectButtonContainer}>
-              <Link style={styles.selectButton} href="./selectCustomer">
-                Select
+              <Link style={styles.selectButton} href="./selectClient">
+                Choose or Add client
               </Link>
             </View>
           </View>
@@ -137,12 +147,11 @@ const styles = StyleSheet.create({
     fontSize: 32,
     color: colors.patternColorD,
   },
-  selectCustomerContainer: {
+  selectClientContainer: {
     flex: 2.2,
     width: '80%',
     alignItems: 'center',
   },
-
   customerPreviewSubcontainer: {
     marginTop: 15,
     flex: 4,
@@ -156,7 +165,7 @@ const styles = StyleSheet.create({
     borderColor: colors.patternColorA,
     backgroundColor: colors.patternColorF,
   },
-  customerNameContainer: {
+  clientNameContainer: {
     flex: 0.8,
     borderBottomWidth: 4,
     borderColor: colors.patternColorA,
@@ -172,7 +181,7 @@ const styles = StyleSheet.create({
     flex: 0.5,
   },
 
-  infoTextCustomerName: {
+  infoTextClientName: {
     paddingLeft: 5,
     fontFamily: 'NotoSans_600SemiBold',
     fontSize: 20,

@@ -14,6 +14,7 @@ export const colors = {
   patternColorB: '#DDE6FF',
   patternColorC: '#C2D3F2',
   patternColorD: '#273774',
+  patternColorE: '#E3E9FF',
   patternColorF: '#f2f4fd',
 };
 

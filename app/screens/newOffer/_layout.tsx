@@ -9,14 +9,6 @@ import {
 } from '@expo-google-fonts/noto-sans';
 import { Slot, SplashScreen, Stack } from 'expo-router';
 
-export const colors = {
-  patternColorA: '#4761C2',
-  patternColorB: '#DDE6FF',
-  patternColorC: '#C2D3F2',
-  patternColorD: '#273774',
-  patternColorF: '#f2f4fd',
-};
-
 export default function Layout() {
   const [fontsLoaded] = useFonts({
     FredokaOne_400Regular,
@@ -38,12 +30,12 @@ export default function Layout() {
         }}
       />
       <Stack.Screen
-        name="selectCustomer"
+        name="selectClient"
         options={{
           presentation: 'modal',
-          title: 'Select Customer',
+          title: 'Select or add client',
           animation: 'slide_from_right',
-          headerBackVisible: false,
+          headerTitle: 'Select or add client',
         }}
       />
     </Stack>
