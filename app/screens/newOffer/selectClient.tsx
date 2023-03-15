@@ -88,6 +88,11 @@ const ClientItem = ({ client }: ItemProps) => (
         >{`Client Id: ${client.clientId}`}</Text>
       </View>
     </Link>
+    <View style={styles.deleteButtonContainer}>
+      <Pressable style={styles.deleteButton}>
+        <Text style={styles.deleteButtonX}>X</Text>
+      </Pressable>
+    </View>
   </View>
 );
 
@@ -116,18 +121,15 @@ export default function ClientListModal() {
         />
       </View>
       <View style={styles.addButtonContainer}>
-        <Pressable
-          style={styles.addButton}
-          onPress={() => router.replace('./newOffer')}
-        >
-          <Text style={styles.addButtonText}>+ Add a new client</Text>
-        </Pressable>
+        <Link style={styles.addButton} href="./addClient">
+          Add new client
+        </Link>
       </View>
     </View>
   );
 }
 
-// style={styles.clientLinkContainer}
+// style={styles.deleteButtonX}
 
 const styles = StyleSheet.create({
   container: {
@@ -165,13 +167,15 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   clientItemContainer: {
+    flex: 5,
+    flexDirection: 'row',
     width: '100%',
-    alignItems: 'stretch',
     backgroundColor: colors.patternColorE,
     borderBottomWidth: 10,
     borderColor: '#FFF',
   },
   clientLinkContainer: {
+    flex: 4,
     marginLeft: 15,
   },
   clientLinkTextName: {
@@ -192,6 +196,28 @@ const styles = StyleSheet.create({
     fontFamily: 'NotoSans_600SemiBold',
     fontSize: 14,
   },
+  deleteButtonContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderLeftWidth: 3,
+    borderColor: '#FFF',
+  },
+  deleteButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 40,
+    height: 40,
+    borderWidth: 3,
+    borderRadius: 50,
+    borderColor: colors.patternColorD,
+  },
+  deleteButtonX: {
+    textAlign: 'center',
+    color: colors.patternColorD,
+    fontFamily: 'FredokaOne_400Regular',
+    fontSize: 20,
+  },
   addButtonContainer: {
     flex: 1.2,
     width: '80%',
@@ -205,8 +231,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.patternColorA,
-  },
-  addButtonText: {
+    textAlignVertical: 'center',
     textAlign: 'center',
     color: '#FFF',
     fontFamily: 'NotoSans_600SemiBold',

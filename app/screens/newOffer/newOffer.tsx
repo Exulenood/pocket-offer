@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     color: '#FFF',
     fontFamily: 'NotoSans_800ExtraBold',
-    fontSize: 18,
+    fontSize: 16,
   },
   selectButtonText: {
     textAlign: 'center',

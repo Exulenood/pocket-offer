@@ -38,6 +38,15 @@ export default function Layout() {
           headerTitle: 'Select or add client',
         }}
       />
+      <Stack.Screen
+        name="addClient"
+        options={{
+          presentation: 'modal',
+          title: 'Add a new client',
+          animation: 'slide_from_right',
+          headerTitle: 'Add a new client',
+        }}
+      />
     </Stack>
   );
 }
