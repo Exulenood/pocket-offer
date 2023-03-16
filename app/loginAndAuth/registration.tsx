@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { apiUrl } from '../../globals/globalDataAndDefinitions';
 import { colors } from '../_layout';
 import Header from '../Header';
 
@@ -25,7 +26,6 @@ export default function Registration() {
   const [newUserName, setNewUserName] = useState<string>('');
   const [newPassword, setNewPassword] = useState<string>('');
   const [errors, setErrors] = useState<{ message: string }[]>([]);
-  const apiUrl: string = 'http://192.168.0.141:3000/api';
 
   const successfulRegistrationAlert = () =>
     Alert.alert('Signed up!', 'You have successfully signed up!', [

@@ -4,12 +4,12 @@ import { useRouter, useSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { apiUrl } from '../../globals/globalDataAndDefinitions';
 import { colors } from '../_layout';
 
 export default function Logout() {
   const router = useRouter();
   const [errors, setErrors] = useState<{ message: string }[]>([]);
-  const apiUrl: string = 'http://192.168.0.141:3000/api/logout';
 
   useEffect(() => {
     async function LogoutOnRoute() {
@@ -30,7 +30,7 @@ export default function Logout() {
         }
       }
       if (tokenToClearSession) {
-        const response = await fetch(apiUrl, {
+        const response = await fetch(`${apiUrl}/logout`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

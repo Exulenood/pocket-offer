@@ -3,6 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { apiUrl } from '../globals/globalDataAndDefinitions';
 import { colors } from './_layout';
 import Header from './Header';
 
@@ -19,7 +20,6 @@ export default function Index() {
   const [logUserName, setLogUserName] = useState<string>('');
   const [logPassword, setLogPassword] = useState<string>('');
   const [errors, setErrors] = useState<{ message: string }[]>([]);
-  const apiUrl: string = 'http://192.168.0.141:3000/api';
 
   async function attemtLogin(userName: string, password: string) {
     const response = await fetch(`${apiUrl}/login`, {

@@ -4,13 +4,13 @@ import { useRouter, useSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { apiUrl } from '../../globals/globalDataAndDefinitions';
 import { colors } from '../_layout';
 
 export default function AuthWrap() {
   const router = useRouter();
   const { reroute } = useSearchParams();
   const [errors, setErrors] = useState<{ message: string }[]>([]);
-  const apiUrl: string = 'http://192.168.0.141:3000/api';
 
   useEffect(() => {
     async function revalidateOnRoute() {

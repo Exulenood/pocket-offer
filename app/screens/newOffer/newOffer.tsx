@@ -13,11 +13,17 @@ import {
 } from 'react-native';
 import { colors } from '../../_layout';
 
-type Clientdata = { id: string; name: string; locality: string };
+type Clientdata = {
+  id: string;
+  definedId: string;
+  name: string;
+  locality: string;
+};
 
 export default function NewOffer() {
   const [selectedClientData, setSelectedClientData] = useState<Clientdata>({
     id: '-',
+    definedId: '-',
     name: 'Please select client',
     locality: '-',
   });
@@ -77,7 +83,7 @@ export default function NewOffer() {
                 </View>
                 <View style={styles.idContainer}>
                   <Text style={styles.infoTextAdditional}>
-                    {`Client Id: ${selectedClientData.id}`}
+                    {`Client Id: ${selectedClientData.definedId}`}
                   </Text>
                 </View>
               </View>

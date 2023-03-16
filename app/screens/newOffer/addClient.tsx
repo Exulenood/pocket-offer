@@ -1,4 +1,4 @@
-import { Link, useNavigation, useRouter } from 'expo-router';
+import { Link, useNavigation, useRouter, useSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import {
@@ -11,6 +11,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { apiUrl } from '../../../globals/globalDataAndDefinitions';
 import { colors } from '../../_layout';
 
 type AddClientDataResponseBody =
@@ -32,7 +33,7 @@ type AddClientDataResponseBody =
 
 export default function ClientListModal() {
   const router = useRouter();
-  const apiUrl: string = 'http://192.168.0.141:3000/api';
+  const { maxClientDefinedId } = useSearchParams();
   const [errors, setErrors] = useState<{ message: string }[]>([]);
   const [clientDefinedId, setClientDefinedId] = useState<string>('');
   const [clientFirstName, setClientFirstName] = useState<string>('');
@@ -43,6 +44,11 @@ export default function ClientListModal() {
   const [clientAddrPostCode, setClientAddrPostCode] = useState<string>('');
   const [clientAddrLocality, setClientAddrLocality] = useState<string>('');
   const [isFormComplete, setIsFormComplete] = useState<boolean>(false);
+
+  useEffect(() => {
+    const proposedDefinedId = parseInt(maxClientDefinedId) + 1;
+    setClientDefinedId(proposedDefinedId.toString());
+  }, []);
 
   useEffect(() => {
     if (
@@ -69,38 +75,6 @@ export default function ClientListModal() {
     isFormComplete,
   ]);
 
-  // useEffect(() => {
-  //   async function getMaxClientDefId() {
-  //     const sessionToken = await SecureStore.getItemAsync('sessionToken');
-  //     const sessionSecret = await SecureStore.getItemAsync('sessionSecret');
-  //     const keyObject = JSON.stringify({
-  //       keyA: sessionToken,
-  //       keyB: sessionSecret,
-  //     });
-  //     console.log(`Object: ${keyObject}`);
-  //     console.log(`token: ${sessionToken}`);
-  //     console.log(`secret: ${sessionSecret}`);
-
-  //     const response = await fetch(`${apiUrl}/createClient/checkClientDefId`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         Authorization: keyObject,
-  //       },
-  //       body: JSON.stringify({
-  //         testkey: 'testvalue',
-  //       }),
-  //     });
-  //     // const data: AddClientDataResponseBody = await response.json();
-  //     // if ('errors' in data) {
-  //     //   setErrors(data.errors);
-  //     //   console.log(errors);
-  //     //   return;
-  //     // }
-  //   }
-  //   getMaxClientDefId();
-  // }, []);
-
   function providePrompt(input: string) {
     if (!input) {
       return 'Please provide:';
@@ -116,7 +90,7 @@ export default function ClientListModal() {
       keyA: sessionToken,
       keyB: sessionSecret,
     });
-    // console.log(`Object: ${keyObject}`);
+    console.log(`Object: ${keyObject}`);
     // console.log(`token: ${sessionToken}`);
     // console.log(`secret: ${sessionSecret}`);
 
@@ -140,7 +114,20 @@ export default function ClientListModal() {
     const data: AddClientDataResponseBody = await response.json();
     if ('errors' in data) {
       setErrors(data.errors);
-      console.log(errors);
+      if (errors[0].message === 'Existing Defined Id') {
+        Alert.alert(
+          'Please select another ID',
+          `The Client ID ${clientDefinedId} is already assigned`,
+          [
+            {
+              text: 'OK',
+              onPress: () => null,
+              style: 'cancel',
+            },
+          ],
+        );
+        return;
+      }
       return;
     }
     // console.log(`Id: ${data.client.clientId}`);
@@ -153,7 +140,7 @@ export default function ClientListModal() {
     router.replace({
       pathname: './newOffer',
       params: {
-        client: `{ "id": "${data.client.clientDefinedId}", "name": "${data.client.clientFirstName} ${data.client.clientLastName}", "locality": "${data.client.clientAddrPostCode} ${data.client.clientAddLocality}" }`,
+        client: `{ "id": "${data.client.clientId}","definedId": "${data.client.clientDefinedId}", "name": "${data.client.clientFirstName} ${data.client.clientLastName}", "locality": "${data.client.clientAddrPostCode} ${data.client.clientAddLocality}" }`,
       },
     });
   }
@@ -199,7 +186,7 @@ export default function ClientListModal() {
               <Text style={styles.emptyInputText}>
                 {providePrompt(clientDefinedId)}
               </Text>
-              <Text style={styles.inputLabelText}>New Customer ID</Text>
+              <Text style={styles.inputLabelText}>New Client ID</Text>
             </View>
             <TextInput
               style={styles.textInputField}

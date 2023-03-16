@@ -1,127 +1,229 @@
 /* eslint-disable no-restricted-syntax */
 import { Link, useNavigation, useRouter } from 'expo-router';
-import React from 'react';
+import * as SecureStore from 'expo-secure-store';
+import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   FlatList,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
+import { apiUrl } from '../../../globals/globalDataAndDefinitions';
 import { colors } from '../../_layout';
 
-type ClientDataResponse = {
-  clientId: string;
+// import ClientItems from './clientItems';
+
+export type ClientDataResponse = {
+  id: string;
+  clientDefinedId: number;
   clientFirstName: string;
   clientLastName: string;
   clientAddrStreet: string;
   clientAddrHouseNo: string;
   clientAddrL2: any;
   clientAddrPostCode: string;
-  clientAddLocality: string;
+  clientAddrLocality: string;
 };
 
 type ItemProps = { client: ClientDataResponse };
 
-const provData: ClientDataResponse[] = [
-  {
-    clientId: '2305863',
-    clientFirstName: 'Leeroy',
-    clientLastName: 'Jenkins',
-    clientAddrStreet: 'Rookery',
-    clientAddrHouseNo: '3',
-    clientAddrL2: undefined,
-    clientAddrPostCode: '2005',
-    clientAddLocality: 'Upper Blackrockspire',
-  },
-  {
-    clientId: '2301862',
-    clientFirstName: 'John',
-    clientLastName: 'Cena',
-    clientAddrStreet: 'East Main Street',
-    clientAddrHouseNo: '1241',
-    clientAddrL2: undefined,
-    clientAddrPostCode: 'CT 06902',
-    clientAddLocality: 'Stamfort',
-  },
-  {
-    clientId: '2309563',
-    clientFirstName: 'Hideo',
-    clientLastName: 'Kojima',
-    clientAddrStreet: 'Highway Route',
-    clientAddrHouseNo: '21',
-    clientAddrL2: 'UCA',
-    clientAddrPostCode: '41-057',
-    clientAddLocality: 'Mountain Knot City',
-  },
-  {
-    clientId: '2307573',
-    clientFirstName: 'Billy',
-    clientLastName: 'Butcher',
-    clientAddrStreet: '5th Avenue',
-    clientAddrHouseNo: '175',
-    clientAddrL2: 'Flatiron Building',
-    clientAddrPostCode: 'NY 10010',
-    clientAddLocality: 'New York City',
-  },
-];
-
-const ClientItem = ({ client }: ItemProps) => (
-  <View style={styles.clientItemContainer}>
-    <Link
-      style={styles.clientLinkContainer}
-      href={`./newOffer/?client={"id":"${client.clientId}","name":"${client.clientFirstName} ${client.clientLastName}","locality":"${client.clientAddrPostCode} ${client.clientAddLocality}"}`}
-    >
-      <View>
-        <Text
-          style={styles.clientLinkTextName}
-        >{`${client.clientFirstName} ${client.clientLastName}`}</Text>
-        <Text
-          style={styles.clientLinkTextAddress}
-        >{`${client.clientAddrStreet} ${client.clientAddrHouseNo}`}</Text>
-        <Text
-          style={styles.clientLinkTextAddress}
-        >{`${client.clientAddrPostCode} ${client.clientAddLocality}`}</Text>
-        <Text
-          style={styles.clientLinkTextId}
-        >{`Client Id: ${client.clientId}`}</Text>
-      </View>
-    </Link>
-    <View style={styles.deleteButtonContainer}>
-      <Pressable style={styles.deleteButton}>
-        <Text style={styles.deleteButtonX}>X</Text>
-      </Pressable>
-    </View>
-  </View>
-);
-
-const renderItem = (item: { item: ClientDataResponse }) => (
-  <ClientItem client={item.item} />
-);
+type ClientDataResponseBody =
+  | {
+      errors: {
+        message: string;
+      }[];
+    }
+  | {
+      clients: {
+        id: string;
+        clientDefinedId: number;
+        clientFirstName: string;
+        clientLastName: string;
+        clientAddrStreet: string;
+        clientAddrHouseNo: string;
+        clientAddrL2: any;
+        clientAddrPostCode: string;
+        clientAddrLocality: string;
+      }[];
+      maxClientDefinedId: number;
+    };
 
 export default function ClientListModal() {
-  const router = useRouter();
+  const [errors, setErrors] = useState<{ message: string }[]>([]);
+  const [maxClientDefinedId, setMaxClientDefinedId] = useState<number>(0);
+  const [definedIdFilterValue, setDefinedIdFilterValue] = useState<string>('');
+  const [lastNameFilterValue, setLastNameFilterValue] = useState<string>('');
+  // const [refresh, setRefresh] = useState<boolean>(false);
+  const [clientData, setClientData] = useState<ClientDataResponse[]>([
+    {
+      id: '',
+      clientDefinedId: 0,
+      clientFirstName: 'Loading...',
+      clientLastName: '',
+      clientAddrStreet: '',
+      clientAddrHouseNo: '',
+      clientAddrL2: '',
+      clientAddrPostCode: '',
+      clientAddrLocality: '',
+    },
+  ]);
+
+  async function deleteClient(clientId: string) {
+    const sessionToken = await SecureStore.getItemAsync('sessionToken');
+    const sessionSecret = await SecureStore.getItemAsync('sessionSecret');
+    const keyObject = JSON.stringify({
+      keyA: sessionToken,
+      keyB: sessionSecret,
+    });
+    console.log(keyObject);
+    await fetch(`${apiUrl}/deleteClient`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: keyObject,
+      },
+      body: JSON.stringify({
+        clientId: clientId,
+      }),
+    });
+    function filterById(item: ClientDataResponse) {
+      if (item.id !== clientId) {
+        return true;
+      }
+    }
+    setClientData(clientData.filter(filterById));
+  }
+
+  function deleteClientAlert(clientId: string, clientWholeName: string) {
+    Alert.alert(
+      'Deleting Client',
+      `Are you sure you want to delete Client ${clientWholeName}? \n (This action cannot be undone)`,
+      [
+        {
+          text: 'Cancel',
+          onPress: () => null,
+          style: 'cancel',
+        },
+        { text: 'OK', onPress: () => deleteClient(clientId) },
+      ],
+    );
+  }
+
+  function renderItem(item: { item: ClientDataResponse }) {
+    const client = item.item;
+    return (
+      <View style={styles.clientItemContainer}>
+        <Link
+          style={styles.clientLinkContainer}
+          href={`./newOffer/?client={"id":"${client.id}","definedId":"${client.clientDefinedId}","name":"${client.clientFirstName} ${client.clientLastName}","locality":"${client.clientAddrPostCode} ${client.clientAddrLocality}"}`}
+        >
+          <View>
+            <Text
+              style={styles.clientLinkTextName}
+            >{`${client.clientFirstName} ${client.clientLastName}`}</Text>
+            <Text
+              style={styles.clientLinkTextAddress}
+            >{`${client.clientAddrStreet} ${client.clientAddrHouseNo}`}</Text>
+            <Text
+              style={styles.clientLinkTextAddress}
+            >{`${client.clientAddrPostCode} ${client.clientAddrLocality}`}</Text>
+            <Text
+              style={styles.clientLinkTextId}
+            >{`Client Id: ${client.clientDefinedId}`}</Text>
+          </View>
+        </Link>
+        <View style={styles.deleteButtonContainer}>
+          <Pressable style={styles.deleteButton}>
+            <Text
+              style={styles.deleteButtonX}
+              onPress={() =>
+                deleteClientAlert(
+                  client.id,
+                  `${client.clientFirstName} ${client.clientLastName}`,
+                )
+              }
+            >
+              X
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+
+    // return <ClientItems client={item.item} />;
+  }
+
+  useEffect(() => {
+    async function getClients() {
+      const sessionToken = await SecureStore.getItemAsync('sessionToken');
+      const sessionSecret = await SecureStore.getItemAsync('sessionSecret');
+      const keyObject = JSON.stringify({
+        keyA: sessionToken,
+        keyB: sessionSecret,
+      });
+      console.log(keyObject);
+
+      const response = await fetch(`${apiUrl}/getClients`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: keyObject,
+        },
+        body: JSON.stringify({
+          clientDefinedId: definedIdFilterValue,
+          clientLastName: lastNameFilterValue,
+        }),
+      });
+      const data: ClientDataResponseBody = await response.json();
+
+      if ('errors' in data) {
+        setErrors(data.errors);
+        console.log(errors);
+        return;
+      }
+      setClientData(data.clients);
+      setMaxClientDefinedId(data.maxClientDefinedId);
+    }
+    getClients().catch((error) => console.error(error));
+  }, [definedIdFilterValue, lastNameFilterValue]);
+
   return (
     <View style={styles.container}>
       <View style={styles.filterContainer}>
         <Text style={styles.lableText}>Filteroptions:</Text>
-        <TextInput style={styles.textInputField} placeholder="Search for ID" />
+        <TextInput
+          style={styles.textInputField}
+          placeholder="Search for ID"
+          onChangeText={setDefinedIdFilterValue}
+          value={definedIdFilterValue}
+          keyboardType="numeric"
+        />
         <TextInput
           style={styles.textInputField}
           placeholder="Search for last Name"
+          onChangeText={setLastNameFilterValue}
+          value={lastNameFilterValue}
         />
       </View>
       <View style={styles.listcontainer}>
         <FlatList
           style={styles.flatlist}
-          data={provData}
+          data={clientData}
+          extraData={clientData}
           renderItem={renderItem}
-          keyExtractor={(item: ClientDataResponse) => item.clientId}
+          keyExtractor={(item: ClientDataResponse) => item.id}
         />
       </View>
+
       <View style={styles.addButtonContainer}>
-        <Link style={styles.addButton} href="./addClient">
+        <Link
+          style={styles.addButton}
+          href={`./addClient?maxClientDefinedId=${maxClientDefinedId}`}
+        >
           Add new client
         </Link>
       </View>
@@ -140,7 +242,7 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     marginTop: 10,
-    flex: 1.8,
+    height: 140,
     width: '80%',
     alignItems: 'center',
     rowGap: 3,
@@ -219,11 +321,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   addButtonContainer: {
-    flex: 1.2,
+    // flex: 1.2,
     width: '80%',
-    height: 148,
+    height: 80,
     alignItems: 'center',
     justifyContent: 'center',
+    margin: 10,
   },
   addButton: {
     width: '100%',
