@@ -9,7 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { colors } from '../_layout';
+import { colors } from '../../globals/globalDataAndDefinitions';
 import Header from '../Header';
 
 export default function Home() {

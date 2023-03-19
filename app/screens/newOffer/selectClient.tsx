@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax */
-import { Link, useNavigation, useRouter } from 'expo-router';
+import { Link, useNavigation, useRouter, useSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import {
@@ -12,8 +12,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { apiUrl } from '../../../globals/globalDataAndDefinitions';
-import { colors } from '../../_layout';
+import { apiUrl, colors } from '../../../globals/globalDataAndDefinitions';
 
 // import ClientItems from './clientItems';
 
@@ -28,8 +27,6 @@ export type ClientDataResponse = {
   clientAddrPostCode: string;
   clientAddrLocality: string;
 };
-
-type ItemProps = { client: ClientDataResponse };
 
 type ClientDataResponseBody =
   | {
@@ -53,11 +50,12 @@ type ClientDataResponseBody =
     };
 
 export default function ClientListModal() {
+  const { selectRefresh } = useSearchParams();
+  const router = useRouter();
   const [errors, setErrors] = useState<{ message: string }[]>([]);
   const [maxClientDefinedId, setMaxClientDefinedId] = useState<number>(0);
   const [definedIdFilterValue, setDefinedIdFilterValue] = useState<string>('');
   const [lastNameFilterValue, setLastNameFilterValue] = useState<string>('');
-  // const [refresh, setRefresh] = useState<boolean>(false);
   const [clientData, setClientData] = useState<ClientDataResponse[]>([
     {
       id: '',
@@ -191,6 +189,15 @@ export default function ClientListModal() {
     getClients().catch((error) => console.error(error));
   }, [definedIdFilterValue, lastNameFilterValue]);
 
+  function dismissModalAndRouteToAddClient() {
+    router.replace({
+      pathname: './addClient',
+      params: {
+        maxClientDefinedId: maxClientDefinedId,
+      },
+    });
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.filterContainer}>
@@ -209,7 +216,7 @@ export default function ClientListModal() {
           value={lastNameFilterValue}
         />
       </View>
-      <View style={styles.listcontainer}>
+      <View style={styles.listContainer}>
         <FlatList
           style={styles.flatlist}
           data={clientData}
@@ -220,18 +227,18 @@ export default function ClientListModal() {
       </View>
 
       <View style={styles.addButtonContainer}>
-        <Link
+        <Pressable
           style={styles.addButton}
-          href={`./addClient?maxClientDefinedId=${maxClientDefinedId}`}
+          onPress={() => dismissModalAndRouteToAddClient()}
         >
-          Add new client
-        </Link>
+          <Text style={styles.addButtonText}>Add new client</Text>
+        </Pressable>
       </View>
     </View>
   );
 }
 
-// style={styles.deleteButtonX}
+// style={styles.addButtonText}
 
 const styles = StyleSheet.create({
   container: {
@@ -260,7 +267,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.patternColorB,
     textAlign: 'center',
   },
-  listcontainer: {
+  listContainer: {
     flex: 5,
     width: '80%',
     alignItems: 'center',
@@ -334,6 +341,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.patternColorA,
+  },
+  addButtonText: {
     textAlignVertical: 'center',
     textAlign: 'center',
     color: '#FFF',

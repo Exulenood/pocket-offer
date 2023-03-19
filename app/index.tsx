@@ -3,8 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { apiUrl } from '../globals/globalDataAndDefinitions';
-import { colors } from './_layout';
+import { apiUrl, colors } from '../globals/globalDataAndDefinitions';
 import Header from './Header';
 
 type LoginDataResponseBody =
@@ -49,7 +48,13 @@ export default function Index() {
     const sessionToken = await SecureStore.getItemAsync('sessionToken');
 
     if (loggedInAs === data.user.username && sessionToken === data.user.token) {
-      router.replace(`/loginAndAuth/authorization?reroute=../screens/home`);
+      // router.replace(`/loginAndAuth/authorization?reroute=../screens/home`);
+      router.replace({
+        pathname: '/loginAndAuth/authorization',
+        params: {
+          home: '../screens/home',
+        },
+      });
     } else {
       console.log('failed to create client side session');
       return;

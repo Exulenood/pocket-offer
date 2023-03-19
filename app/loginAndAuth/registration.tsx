@@ -9,8 +9,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { apiUrl } from '../../globals/globalDataAndDefinitions';
-import { colors } from '../_layout';
+import { apiUrl, colors } from '../../globals/globalDataAndDefinitions';
 import Header from '../Header';
 
 type RegDataResponseBody =

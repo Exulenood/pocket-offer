@@ -4,15 +4,21 @@ import { useRouter, useSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { apiUrl } from '../../globals/globalDataAndDefinitions';
-import { colors } from '../_layout';
+import { apiUrl, colors } from '../../globals/globalDataAndDefinitions';
 
 export default function AuthWrap() {
   const router = useRouter();
-  const { reroute } = useSearchParams();
+  const { home } = useSearchParams();
+  const { offer } = useSearchParams();
   const [errors, setErrors] = useState<{ message: string }[]>([]);
+  const [messageText, setMessageText] = useState<string>('LOADING');
+  const [redirect, setRedirect] = useState<string>('');
 
   useEffect(() => {
+    if (home) {
+      setMessageText('WELCOME');
+      setRedirect(home);
+    }
     async function revalidateOnRoute() {
       const tokenForValidation = await SecureStore.getItemAsync('sessionToken');
       if (tokenForValidation) {
@@ -34,23 +40,32 @@ export default function AuthWrap() {
 
         const sessionSecret = await SecureStore.getItemAsync('sessionSecret');
 
-        if (sessionSecret === data.validation.cToken) {
-          router.replace(`../${reroute}`);
-        } else {
+        if (sessionSecret !== data.validation.cToken) {
           console.log('failed to store cToken');
           router.replace('../');
+        } else {
+          if (home) {
+            setMessageText('WELCOME');
+            router.replace(`../${home}`);
+          } else if (offer) {
+            setMessageText('CREATING OFFER');
+            router.replace(
+              `../screens/processOffer/mainOffer?offerDefinedId=${offer}`,
+            );
+          }
         }
       } else {
         console.log('failed to load Token');
         router.replace('../');
       }
     }
+
     revalidateOnRoute();
   }, []);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.loadingText}>Loading</Text>
+      <Text style={styles.loadingText}>{messageText}</Text>
     </View>
   );
 }

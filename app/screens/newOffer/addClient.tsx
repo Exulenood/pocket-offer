@@ -11,8 +11,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { apiUrl } from '../../../globals/globalDataAndDefinitions';
-import { colors } from '../../_layout';
+import { apiUrl, colors } from '../../../globals/globalDataAndDefinitions';
 
 type AddClientDataResponseBody =
   | {
@@ -36,6 +35,8 @@ export default function ClientListModal() {
   const { maxClientDefinedId } = useSearchParams();
   const [errors, setErrors] = useState<{ message: string }[]>([]);
   const [clientDefinedId, setClientDefinedId] = useState<string>('');
+  const [clientDefinedIdPlaceholder, setClientDefinedIdPlaceholder] =
+    useState<string>('');
   const [clientFirstName, setClientFirstName] = useState<string>('');
   const [clientLastName, setClientLastName] = useState<string>('');
   const [clientAddrStreet, setClientAddrStreet] = useState<string>('');
@@ -46,8 +47,12 @@ export default function ClientListModal() {
   const [isFormComplete, setIsFormComplete] = useState<boolean>(false);
 
   useEffect(() => {
-    const proposedDefinedId = parseInt(maxClientDefinedId) + 1;
-    setClientDefinedId(proposedDefinedId.toString());
+    if (!maxClientDefinedId) {
+      setClientDefinedIdPlaceholder('Please enter a first Customer ID Number');
+    } else {
+      const proposedDefinedId = parseInt(maxClientDefinedId) + 1;
+      setClientDefinedId(proposedDefinedId.toString());
+    }
   }, []);
 
   useEffect(() => {
@@ -186,11 +191,11 @@ export default function ClientListModal() {
               <Text style={styles.emptyInputText}>
                 {providePrompt(clientDefinedId)}
               </Text>
-              <Text style={styles.inputLabelText}>New Client ID</Text>
+              <Text style={styles.inputLabelText}>New Client ID Number</Text>
             </View>
             <TextInput
               style={styles.textInputField}
-              placeholder="New Customer ID"
+              placeholder={clientDefinedIdPlaceholder}
               onChangeText={setClientDefinedId}
               value={clientDefinedId}
               keyboardType="numeric"

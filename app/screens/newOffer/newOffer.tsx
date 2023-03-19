@@ -1,17 +1,19 @@
 /* eslint-disable no-restricted-syntax */
-import { Link, useRouter, useSearchParams } from 'expo-router';
+import { Link, useNavigation, useRouter, useSearchParams } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
   BackHandler,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
-import { colors } from '../../_layout';
+import { apiUrl, colors } from '../../../globals/globalDataAndDefinitions';
 
 type Clientdata = {
   id: string;
@@ -20,17 +22,85 @@ type Clientdata = {
   locality: string;
 };
 
+type CreateOfferResponseBody =
+  | {
+      errors: {
+        message: string;
+      }[];
+    }
+  | {
+      offer: {
+        newOffer: string;
+      };
+    };
+
+type GetMaxOfferDefinedIDResponseBody =
+  | {
+      errors: {
+        message: string;
+      }[];
+    }
+  | {
+      offer: {
+        maxClientDefinedId: number;
+      };
+    };
+
 export default function NewOffer() {
-  const [selectedClientData, setSelectedClientData] = useState<Clientdata>({
-    id: '-',
-    definedId: '-',
-    name: 'Please select client',
-    locality: '-',
-  });
   const { client } = useSearchParams();
   const router = useRouter();
+  const [errors, setErrors] = useState<{ message: string }[]>([]);
+  const [selectedClientData, setSelectedClientData] = useState<Clientdata>({
+    id: '',
+    definedId: '',
+    name: 'Please select client',
+    locality: '',
+  });
+  const [offerDefinedIdPlaceholder, setOfferDefinedIdPlaceholder] =
+    useState<string>('');
+  const [offerTitle, setOfferTitle] = useState<string>('');
+  const [offerDefinedId, setOfferDefinedId] = useState<string>('');
+  const [selectedDefClientId, setSelectedDefClientId] = useState<string>('');
+
+  // const [offerTitle, setOfferTitle] = useState<string>('')
 
   useEffect(() => {
+    async function getMaxDefinedOfferId() {
+      const sessionToken = await SecureStore.getItemAsync('sessionToken');
+      const sessionSecret = await SecureStore.getItemAsync('sessionSecret');
+      const keyObject = JSON.stringify({
+        keyA: sessionToken,
+        keyB: sessionSecret,
+      });
+      console.log(keyObject);
+
+      const response = await fetch(`${apiUrl}/getMaxOfferId`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: keyObject,
+        },
+        body: JSON.stringify({
+          request: 'maxOfferId',
+        }),
+      });
+      const data: GetMaxOfferDefinedIDResponseBody = await response.json();
+
+      if ('errors' in data) {
+        setErrors(data.errors);
+        console.log(errors);
+        return;
+      }
+
+      if (!data.offer.maxClientDefinedId) {
+        setOfferDefinedIdPlaceholder('Please enter a first Offer ID Number');
+      } else {
+        const proposedDefinedId = data.offer.maxClientDefinedId + 1;
+        setOfferDefinedId(proposedDefinedId.toString());
+      }
+    }
+    getMaxDefinedOfferId().catch((error) => console.error(error));
+
     const backAction = () => {
       Alert.alert(
         'Cancel Offer Creation',
@@ -54,65 +124,166 @@ export default function NewOffer() {
 
     return () => backHandler.remove();
   }, []);
+
   useEffect(() => {
     if (client) {
       setSelectedClientData(JSON.parse(client));
+      setSelectedDefClientId(`Client Id: ${selectedClientData.definedId}`);
     }
   }, [client]);
+
+  async function createOffer() {
+    const sessionToken = await SecureStore.getItemAsync('sessionToken');
+    const sessionSecret = await SecureStore.getItemAsync('sessionSecret');
+    const keyObject = JSON.stringify({
+      keyA: sessionToken,
+      keyB: sessionSecret,
+    });
+    console.log(`Object: ${keyObject}`);
+
+    const response = await fetch(`${apiUrl}/createOffer`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: keyObject,
+      },
+      body: JSON.stringify({
+        offerTitle: offerTitle,
+        offerDefinedId: offerDefinedId,
+        clientId: selectedClientData.id,
+      }),
+    });
+
+    const data: CreateOfferResponseBody = await response.json();
+    if ('errors' in data) {
+      setErrors(data.errors);
+      if (errors[0].message === 'Existing Defined Id') {
+        Alert.alert(
+          'Please select another ID',
+          `The Client ID ${offerDefinedId} is already assigned`,
+          [
+            {
+              text: 'OK',
+              onPress: () => null,
+              style: 'cancel',
+            },
+          ],
+        );
+        return;
+      }
+      return;
+    }
+
+    if (data.offer.newOffer) {
+      router.replace(
+        `../../loginAndAuth/authorization?offer=${offerDefinedId}`,
+      );
+    } else {
+      console.log('Did not receive dataset Id from Server');
+      return;
+    }
+  }
+
+  function confirmCreateOffer() {
+    if (!selectedClientData.id) {
+      Alert.alert('No client chosen', 'Please select a client', [
+        {
+          text: 'OK',
+          onPress: () => null,
+          style: 'cancel',
+        },
+      ]);
+    } else if (!offerTitle || !offerDefinedId) {
+      Alert.alert(
+        'Some Information is missing',
+        'Please fill in both fields for \n Offer Title and Offer ID Number ',
+        [
+          {
+            text: 'OK',
+            onPress: () => null,
+            style: 'cancel',
+          },
+        ],
+      );
+    } else {
+      Alert.alert(
+        'Create Offer:',
+        `Offer Title: ${offerTitle} \nOffer ID Number: ${offerDefinedId} \nfor client \n${selectedClientData.name}`,
+        [
+          {
+            text: 'Cancel',
+            onPress: () => null,
+            style: 'cancel',
+          },
+          { text: 'OK', onPress: () => createOffer() },
+        ],
+      );
+    }
+  }
 
   return (
     <View style={styles.container}>
       <View style={styles.headContainer}>
         <Text style={styles.headText}>Create a new offer</Text>
       </View>
-      <View style={styles.selectClientContainer}>
-        <Text style={styles.lableText}>Please select a client:</Text>
-        <View style={styles.customerPreviewcontainer}>
-          <View style={styles.customerPreviewSubcontainer}>
-            <View style={styles.informationContainer}>
-              <View style={styles.clientNameContainer}>
-                <Text style={styles.infoTextClientName}>
-                  {selectedClientData.name}
-                </Text>
-              </View>
-              <View style={styles.idAndLocationContainer}>
-                <View style={styles.locationContainer}>
-                  <Text style={styles.infoTextAdditional}>
-                    {selectedClientData.locality}
+      <ScrollView style={styles.inputsScrollview}>
+        <View style={styles.selectClientContainer}>
+          <Text style={styles.lableText}>Please select a client:</Text>
+          <View style={styles.customerPreviewcontainer}>
+            <View style={styles.customerPreviewSubcontainer}>
+              <View style={styles.informationContainer}>
+                <View style={styles.clientNameContainer}>
+                  <Text style={styles.infoTextClientName}>
+                    {selectedClientData.name}
                   </Text>
                 </View>
-                <View style={styles.idContainer}>
-                  <Text style={styles.infoTextAdditional}>
-                    {`Client Id: ${selectedClientData.definedId}`}
-                  </Text>
+                <View style={styles.idAndLocationContainer}>
+                  <View style={styles.locationContainer}>
+                    <Text style={styles.infoTextAdditional}>
+                      {selectedClientData.locality}
+                    </Text>
+                  </View>
+                  <View style={styles.idContainer}>
+                    <Text style={styles.infoTextAdditional}>
+                      {selectedDefClientId}
+                    </Text>
+                  </View>
                 </View>
               </View>
-            </View>
-            <View style={styles.SelectButtonContainer}>
-              <Link style={styles.selectButton} href="./selectClient">
-                Choose or Add client
-              </Link>
+              <View style={styles.selectButtonContainer}>
+                <Link style={styles.selectButton} href="./selectClient">
+                  Choose or Add client
+                </Link>
+              </View>
             </View>
           </View>
         </View>
-      </View>
-      <View style={styles.newOfferInputContainer}>
-        <View style={styles.singleInputContainer}>
-          <Text style={styles.lableText}>
-            Please enter a title for the offer:
-          </Text>
-          <TextInput style={styles.textInputField} placeholder="New Title" />
+        <View style={styles.newOfferInputContainer}>
+          <View style={styles.singleInputContainer}>
+            <Text style={styles.lableText}>
+              Please enter a title for the offer:
+            </Text>
+            <TextInput
+              style={styles.textInputField}
+              placeholder="New Title"
+              onChangeText={setOfferTitle}
+              value={offerTitle}
+            />
+          </View>
+          <View style={styles.singleInputContainer}>
+            <Text style={styles.lableText}>
+              The new offer will have the ID-Number:
+            </Text>
+            <TextInput
+              style={styles.textInputField}
+              placeholder={offerDefinedIdPlaceholder}
+              onChangeText={setOfferDefinedId}
+              value={offerDefinedId}
+              keyboardType="numeric"
+            />
+          </View>
         </View>
-        <View style={styles.singleInputContainer}>
-          <Text style={styles.lableText}>
-            The new offer will have the ID-Number:
-          </Text>
-          <TextInput
-            style={styles.textInputField}
-            placeholder="New Id-Number"
-          />
-        </View>
-      </View>
+      </ScrollView>
       <View style={styles.bottomMenuButtonContainer}>
         <Pressable
           style={styles.bottomMenuNegButton}
@@ -123,7 +294,7 @@ export default function NewOffer() {
 
         <Pressable
           style={styles.bottomMenuPosButton}
-          onPress={() => router.push('../../')}
+          onPress={() => confirmCreateOffer()}
         >
           <Text style={styles.bottomMenuButtonText}>Create new offer</Text>
         </Pressable>
@@ -142,7 +313,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   headContainer: {
-    flex: 1,
+    height: 70,
     justifyContent: 'center',
     marginTop: 60,
     width: '80%',
@@ -153,9 +324,14 @@ const styles = StyleSheet.create({
     fontSize: 32,
     color: colors.patternColorD,
   },
-  selectClientContainer: {
-    flex: 2.2,
+
+  inputsScrollview: {
+    flex: 1,
     width: '80%',
+  },
+  selectClientContainer: {
+    height: 180,
+    width: '100%',
     alignItems: 'center',
   },
   customerPreviewSubcontainer: {
@@ -201,7 +377,7 @@ const styles = StyleSheet.create({
     color: colors.patternColorD,
   },
 
-  SelectButtonContainer: {
+  selectButtonContainer: {
     flex: 1,
     height: 112,
     borderTopWidth: 4,
@@ -234,10 +410,10 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   newOfferInputContainer: {
-    flex: 2.8,
-    width: '80%',
+    width: '100%',
     alignItems: 'center',
     rowGap: 10,
+    marginTop: 15,
   },
   singleInputContainer: {
     width: '100%',
@@ -258,7 +434,9 @@ const styles = StyleSheet.create({
   },
 
   bottomMenuButtonContainer: {
-    flex: 1,
+    height: 115,
+    paddingTop: 15,
+    backgroundColor: '#fff',
     flexDirection: 'row',
     alignItems: 'stretch',
     justifyContent: 'space-between',
@@ -283,21 +461,3 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
 });
-
-// squareButtonContainer: {
-//   flex: 5,
-//   justifyContent: 'space-evenly',
-// },
-// squareButton: {
-//   width: '40%',
-//   aspectRatio: 1 / 1,
-//   justifyContent: 'center',
-//   alignItems: 'center',
-//   backgroundColor: colors.patternColorA,
-// },
-// squareButtonText: {
-//   textAlign: 'center',
-//   color: '#FFF',
-//   fontFamily: 'NotoSans_600SemiBold',
-//   fontSize: 20,
-// },
