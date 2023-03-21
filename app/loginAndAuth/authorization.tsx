@@ -12,12 +12,13 @@ export default function AuthWrap() {
   const { offer } = useSearchParams();
   const [errors, setErrors] = useState<{ message: string }[]>([]);
   const [messageText, setMessageText] = useState<string>('LOADING');
-  const [redirect, setRedirect] = useState<string>('');
+  // const [redirect, setRedirect] = useState<string>('');
 
   useEffect(() => {
     if (home) {
       setMessageText('WELCOME');
-      setRedirect(home);
+    } else if (offer) {
+      setMessageText('CREATING OFFER');
     }
     async function revalidateOnRoute() {
       const tokenForValidation = await SecureStore.getItemAsync('sessionToken');
@@ -45,10 +46,8 @@ export default function AuthWrap() {
           router.replace('../');
         } else {
           if (home) {
-            setMessageText('WELCOME');
             router.replace(`../${home}`);
           } else if (offer) {
-            setMessageText('CREATING OFFER');
             router.replace(
               `../screens/processOffer/mainOffer?offerDefinedId=${offer}`,
             );

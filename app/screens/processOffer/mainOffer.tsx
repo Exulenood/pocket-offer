@@ -1,6 +1,7 @@
 /* eslint-disable no-restricted-syntax */
 import { Link, useRouter, useSearchParams } from 'expo-router';
-import React, { useState } from 'react';
+import * as SecureStore from 'expo-secure-store';
+import React, { useEffect, useState } from 'react';
 import {
   FlatList,
   Pressable,
@@ -12,6 +13,7 @@ import {
 import { apiUrl, colors } from '../../../globals/globalDataAndDefinitions';
 
 type PositionDataResponse = {
+  id: string;
   clientId: string;
   offerDefinedId: number;
   offerTitle: string;
@@ -19,14 +21,13 @@ type PositionDataResponse = {
   quantity: number | null;
   quantityUnit: string | null;
   positionIsOptional: boolean;
-  itemId: number | null;
+  itemId: string | null;
   itemTitle: string | null;
   itemText: string | null;
-  itemSalesPrice: number | null;
-  itemSalesDiscount: number | null;
-  itemCost: number | null;
+  itemSalesPrice: string | null;
+  itemSalesDiscount: string | null;
+  itemCost: string | null;
   itemIsModified: boolean | null;
-  createdAt: string;
 };
 
 type PositionDataResponseBody =
@@ -36,7 +37,8 @@ type PositionDataResponseBody =
       }[];
     }
   | {
-      clients: {
+      offerPositions: {
+        id: string;
         clientId: string;
         offerDefinedId: number;
         offerTitle: string;
@@ -44,81 +46,160 @@ type PositionDataResponseBody =
         quantity: number | null;
         quantityUnit: string | null;
         positionIsOptional: boolean;
-        itemId: number | null;
+        itemId: string | null;
         itemTitle: string | null;
         itemText: string | null;
-        itemSalesPrice: number | null;
-        itemSalesDiscount: number | null;
-        itemCost: number | null;
+        itemSalesPrice: string | null;
+        itemSalesDiscount: string | null;
+        itemCost: string | null;
         itemIsModified: boolean | null;
-        createdAt: string;
       }[];
-      maxClientDefinedId: number;
+      creationDate: string;
+      clientName: string;
     };
 
 export default function UserProfileAndSettings() {
   const { offerDefinedId } = useSearchParams();
   const router = useRouter();
+  const [errors, setErrors] = useState<{ message: string }[]>([]);
   const [positionData, setPositionData] = useState<PositionDataResponse[]>([
     {
+      id: '',
       clientId: '',
       offerDefinedId: parseInt(offerDefinedId),
       offerTitle: '',
       positionId: '',
-      quantity: null,
-      quantityUnit: null,
+      quantity: 1,
+      quantityUnit: 'pc',
       positionIsOptional: false,
-      itemId: null,
-      itemTitle: null,
+      itemId: '-',
+      itemTitle: '',
       itemText: '',
-      itemSalesPrice: null,
-      itemSalesDiscount: null,
-      itemCost: null,
-      itemIsModified: null,
-      createdAt: '',
+      itemSalesPrice: '',
+      itemSalesDiscount: '',
+      itemCost: '',
+      itemIsModified: false,
     },
   ]);
+  const [creationDate, setCreationDate] = useState<string>('');
+  const [clientName, setClientName] = useState<string>('');
+  const [offerDefIdTitle, setOfferDefIdTitle] = useState<string>('');
 
   function renderItem(item: { item: PositionDataResponse }) {
     const position = item.item;
+    const data = JSON.stringify({
+      offerRowId: position.id,
+      positionId: position.positionId,
+      quantity: position.quantity ? position.quantity.toString() : '1',
+      quantityUnit: position.quantityUnit ? position.quantityUnit : 'pc',
+      positionIsOptional: position.positionIsOptional,
+      itemId: position.itemId ? position.itemId : '-',
+      itemTitle: position.itemTitle ? position.itemTitle : '',
+      itemText: position.itemText ? position.itemText : '',
+      itemSalesPrice: position.itemSalesPrice ? position.itemSalesPrice : '',
+      itemSalesDiscount: position.itemSalesDiscount
+        ? position.itemSalesDiscount
+        : '',
+      itemCost: position.itemCost ? position.itemCost : '',
+      itemIsModified: false,
+    });
+
     return (
       <View style={styles.positionContainer}>
-        <View style={styles.showPositionContainer}>
-          <Text style={styles.showPositionText}>10</Text>
+        <View style={styles.positionIdContainer}>
+          <Text style={styles.showPositionText}>{position.positionId}</Text>
         </View>
-        <Link style={styles.itemLinkContainer} href="../home">
-          <View>
-            <Text style={styles.itemLinkTitle}>{position.itemTitle}</Text>
-            <Text style={styles.itemLinkText}>{position.itemText}</Text>
-            <Text style={styles.clientLinkTextId}>
-              {position.itemId ? `Item ID: ${position.itemId}` : ''}
-            </Text>
+        <Pressable
+          style={styles.positionInfoLink}
+          onPress={() => router.push(`./editItem/?position=${data}`)}
+        >
+          <View style={styles.positionInfoContainer}>
+            <View style={styles.positionUpperSubContainer}>
+              <Text style={styles.itemTitleText}>{position.itemTitle}</Text>
+              <Text style={styles.itemTextText}>{position.itemText}</Text>
+              <Text style={styles.itemIdText}>
+                {position.itemId ? `Item ID: ${position.itemId}` : ''}
+              </Text>
+            </View>
+            <View style={styles.positionLowerSubContainer}>
+              <Text style={styles.itemQuantityAndPriceText}>
+                {position.quantity
+                  ? `${position.quantity} ${position.quantityUnit}`
+                  : ''}
+              </Text>
+              <Text style={styles.forEachTxt}>
+                {position.quantity ? 'for' : ''}
+              </Text>
+              <Text style={styles.itemQuantityAndPriceText}>
+                {position.itemSalesPrice ? `€ ${position.itemSalesPrice}` : ''}
+              </Text>
+              <Text style={styles.forEachTxt}>
+                {position.quantity && position.itemSalesPrice ? 'each' : ''}
+              </Text>
+            </View>
           </View>
-        </Link>
-        <View style={styles.deleteButtonContainer}>
-          <Pressable style={styles.deleteButton}>
-            <Text style={styles.deleteButtonX} onPress={() => null}>
-              X
-            </Text>
+        </Pressable>
+        <View style={styles.positionDeleteContainer}>
+          <Pressable
+            style={styles.deleteButton}
+            onPress={() => router.push('../home')}
+          >
+            <Text style={styles.deleteButtonX}>X</Text>
           </Pressable>
         </View>
       </View>
     );
-
-    // return <ClientItems client={item.item} />;
+    // style={styles.forEachTxt}
   }
+
+  useEffect(() => {
+    async function getPositions() {
+      const sessionToken = await SecureStore.getItemAsync('sessionToken');
+      const sessionSecret = await SecureStore.getItemAsync('sessionSecret');
+      const keyObject = JSON.stringify({
+        keyA: sessionToken,
+        keyB: sessionSecret,
+      });
+      console.log(keyObject);
+
+      const response = await fetch(`${apiUrl}/getOfferPositions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: keyObject,
+        },
+        body: JSON.stringify({
+          offerDefinedId: offerDefinedId,
+        }),
+      });
+      const data: PositionDataResponseBody = await response.json();
+
+      if ('errors' in data) {
+        setErrors(data.errors);
+        console.log(errors);
+        return;
+      }
+      setPositionData(data.offerPositions);
+      setCreationDate(data.creationDate);
+      setClientName(data.clientName);
+      setOfferDefIdTitle(`Offer ${offerDefinedId}`);
+    }
+    getPositions().catch((error) => console.error(error));
+  }, []);
 
   return (
     <View style={styles.container}>
       <View style={styles.headContainer}>
         <View style={styles.idandTitleContainer}>
-          <Text style={styles.headTextOfferDefNumber}>Offer 23030001</Text>
-          <Text style={styles.headTextOfferTitle}>New first Offer</Text>
+          <Text style={styles.headTextOfferDefNumber}>{offerDefIdTitle}</Text>
+          <Text style={styles.headTextOfferTitle}>
+            {positionData[0].offerTitle}
+          </Text>
         </View>
         <View style={styles.listHeadContainer}>
           <View style={styles.clientAndDateContainer}>
-            <Text style={styles.headTextClient}>Rodney McKay</Text>
-            <Text style={styles.headTextDate}>2023-03-18</Text>
+            <Text style={styles.headTextClient}>{clientName}</Text>
+            <Text style={styles.headTextDate}>{creationDate}</Text>
           </View>
           <View style={styles.columnDescriptionContainer}>
             <View style={styles.columnAContainer}>
@@ -162,7 +243,7 @@ export default function UserProfileAndSettings() {
   );
 }
 
-// style={styles.columnAContainer}
+// style={styles.deleteButton}
 
 const styles = StyleSheet.create({
   container: {
@@ -172,7 +253,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   headContainer: {
-    height: 145,
+    height: 150,
     marginTop: 40,
     width: '80%',
     alignItems: 'center',
@@ -206,7 +287,7 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
   },
   clientAndDateContainer: {
-    height: 30,
+    height: 35,
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -260,56 +341,84 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
-  positionContainer: {
-    flex: 6,
-    flexDirection: 'row',
-    width: '100%',
-    backgroundColor: '#FFF',
-    borderBottomWidth: 10,
-    borderColor: '#FFF',
-    columnGap: 3,
-  },
   // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-  showPositionContainer: {
-    // flex: 1,
+  positionContainer: {
+    width: '100%',
+    flex: 1,
+    flexDirection: 'row',
+    columnGap: 3,
+    backgroundColor: '#FFF',
+  },
+  positionIdContainer: {
     width: 45,
-    alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.patternColorE,
   },
-
   showPositionText: {
+    includeFontPadding: false,
     textAlign: 'center',
     color: colors.patternColorD,
     fontFamily: 'NotoSans_800ExtraBold',
     fontSize: 20,
-    paddingBottom: 2,
   },
-  //
-  itemLinkContainer: {
-    flex: 3.7,
+  positionInfoLink: {
+    flex: 4,
+  },
+  positionInfoContainer: {
+    width: '100%',
+    flexDirection: 'column',
+    rowGap: 2,
+    backgroundColor: '#FFF',
+  },
+  positionUpperSubContainer: {
     backgroundColor: colors.patternColorE,
+    width: '100%',
   },
-  itemLinkTitle: {
+  itemTitleText: {
+    includeFontPadding: false,
     textAlign: 'left',
     color: colors.patternColorD,
     fontFamily: 'NotoSans_600SemiBold',
     fontSize: 17,
   },
-  itemLinkText: {
+  itemTextText: {
+    includeFontPadding: false,
     textAlign: 'left',
     color: colors.patternColorD,
     fontFamily: 'NotoSans_400Regular',
-    fontSize: 15,
+    fontSize: 13,
   },
-  clientLinkTextId: {
+  itemIdText: {
+    includeFontPadding: false,
     textAlign: 'left',
     color: colors.patternColorD,
     fontFamily: 'NotoSans_600SemiBold',
-    fontSize: 14,
+    fontSize: 12,
   },
-  deleteButtonContainer: {
-    flex: 1.3,
+  forEachTxt: {
+    includeFontPadding: false,
+    textAlign: 'left',
+    textAlignVertical: 'bottom',
+    color: colors.patternColorD,
+    fontFamily: 'NotoSans_400Regular',
+    fontSize: 13,
+  },
+  itemQuantityAndPriceText: {
+    includeFontPadding: false,
+    textAlign: 'left',
+    textAlignVertical: 'bottom',
+    color: colors.patternColorD,
+    fontFamily: 'NotoSans_600SemiBold',
+    fontSize: 15,
+  },
+  positionLowerSubContainer: {
+    backgroundColor: colors.patternColorE,
+    width: '100%',
+    flexDirection: 'row',
+    columnGap: 5,
+  },
+  positionDeleteContainer: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.patternColorE,
