@@ -3,6 +3,7 @@ import { Link, useRouter, useSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   FlatList,
   Pressable,
   StyleSheet,
@@ -86,7 +87,48 @@ export default function UserProfileAndSettings() {
   const [clientName, setClientName] = useState<string>('');
   const [offerDefIdTitle, setOfferDefIdTitle] = useState<string>('');
   const [maxExistingPosId, setMaxExistingPosId] = useState<string>('');
+  const [refresh, setRefresh] = useState<boolean>(false);
 
+  async function deletePosition(offerRowid: string) {
+    const sessionToken = await SecureStore.getItemAsync('sessionToken');
+    const sessionSecret = await SecureStore.getItemAsync('sessionSecret');
+    const keyObject = JSON.stringify({
+      keyA: sessionToken,
+      keyB: sessionSecret,
+    });
+    console.log(keyObject);
+    await fetch(`${apiUrl}/deletePosition`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: keyObject,
+      },
+      body: JSON.stringify({
+        offerRowId: offerRowid,
+      }),
+    });
+
+    if (refresh) {
+      setRefresh(false);
+    } else {
+      setRefresh(true);
+    }
+  }
+
+  function deletePositionAlert(offerRowId: string, positionId: string) {
+    Alert.alert(
+      'Deleting Client',
+      `Are you sure you want to delete Position ${positionId}?`,
+      [
+        {
+          text: 'Cancel',
+          onPress: () => null,
+          style: 'cancel',
+        },
+        { text: 'OK', onPress: () => deletePosition(offerRowId) },
+      ],
+    );
+  }
   function renderItem(item: { item: PositionDataResponse }) {
     const position = item.item;
     const data = JSON.stringify({
@@ -144,7 +186,9 @@ export default function UserProfileAndSettings() {
         <View style={styles.positionDeleteContainer}>
           <Pressable
             style={styles.deleteButton}
-            onPress={() => router.push('../home')}
+            onPress={() =>
+              deletePositionAlert(position.id, position.positionId)
+            }
           >
             <Text style={styles.deleteButtonX}>X</Text>
           </Pressable>
@@ -188,7 +232,7 @@ export default function UserProfileAndSettings() {
       setOfferDefIdTitle(`Offer ${offerDefinedId}`);
     }
     getPositions().catch((error) => console.error(error));
-  }, []);
+  }, [refresh]);
 
   return (
     <View style={styles.container}>
