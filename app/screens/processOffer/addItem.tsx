@@ -21,43 +21,24 @@ type ApplyResponse =
       }[];
     }
   | {
-      isEdited: boolean;
+      isAdded: boolean;
       offerDefinedId: string;
     };
 
 type PositionData = {
-  offerRowId: string;
-  positionId: string;
-  quantity: string;
-  quantityUnit: string;
-  positionIsOptional: boolean;
-  itemId: string;
-  itemTitle: string;
-  itemText: string;
-  itemSalesPrice: string;
-  itemSalesDiscount: string;
-  itemCost: string;
-  itemIsModified: boolean;
+  offerDefinedId: string;
+  maxPositionId: string;
 };
 
-export default function EditItem() {
-  const { position } = useSearchParams();
+export default function AddItem() {
+  const { newPosition } = useSearchParams();
   const router = useRouter();
   const [errors, setErrors] = useState<{ message: string }[]>([]);
   const [positionData, setPositionData] = useState<PositionData>({
-    offerRowId: '',
-    positionId: '',
-    quantity: '',
-    quantityUnit: '',
-    positionIsOptional: false,
-    itemId: '',
-    itemTitle: '',
-    itemText: '',
-    itemSalesPrice: '',
-    itemSalesDiscount: '',
-    itemCost: '',
-    itemIsModified: false,
+    offerDefinedId: '',
+    maxPositionId: '',
   });
+  const [offerDefinedId, setOfferDefinedId] = useState<string>('');
   const [positionNumber, setPositionNumber] = useState<string>('');
   const [quantity, setQuantity] = useState<string>('1');
   const [quantityUnit, setQuantityUnit] = useState<string>('pc');
@@ -70,26 +51,23 @@ export default function EditItem() {
   const [itemSalesDiscount, setItemSalesDiscount] = useState<string>('0');
 
   useEffect(() => {
-    if (position) {
-      const data = JSON.parse(position);
+    if (newPosition) {
+      const data = JSON.parse(newPosition);
       setPositionData(data);
     }
   }, []);
 
   useEffect(() => {
-    setPositionNumber(positionData.positionId);
-    setQuantity(positionData.quantity);
-    setQuantityUnit(positionData.quantityUnit);
-    setIsOptional(positionData.positionIsOptional);
-    setItemId(positionData.itemId);
-    setItemTitle(positionData.itemTitle);
-    setItemText(positionData.itemText);
-    setItemCost(positionData.itemCost);
-    setItemSalesPrice(positionData.itemSalesPrice);
-    setItemSalesDiscount(positionData.itemSalesDiscount);
+    if (positionData.maxPositionId) {
+      const maxPosId = parseInt(positionData.maxPositionId) + 10;
+      setPositionNumber(maxPosId.toString());
+    } else {
+      setPositionNumber('1');
+    }
+    setOfferDefinedId(positionData.offerDefinedId);
   }, [positionData]);
 
-  async function applyChanges() {
+  async function addPosition() {
     const sessionToken = await SecureStore.getItemAsync('sessionToken');
     const sessionSecret = await SecureStore.getItemAsync('sessionSecret');
     const keyObject = JSON.stringify({
@@ -97,14 +75,14 @@ export default function EditItem() {
       keyB: sessionSecret,
     });
     console.log(keyObject);
-    const response = await fetch(`${apiUrl}/editPosition`, {
-      method: 'PUT',
+    const response = await fetch(`${apiUrl}/addPosition`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: keyObject,
       },
       body: JSON.stringify({
-        offerRowId: positionData.offerRowId,
+        offerDefinedId: offerDefinedId,
         positionId: positionNumber,
         quantity: parseInt(quantity),
         quantityUnit: quantityUnit,
@@ -112,12 +90,10 @@ export default function EditItem() {
         itemId: itemId,
         itemTitle: itemTitle,
         itemText: itemText,
-        itemSalesPrice: itemSalesPrice ? parseFloat(itemSalesPrice) : 0,
-        itemSalesDiscount: itemSalesDiscount
-          ? parseFloat(itemSalesDiscount)
-          : 0,
-        itemCost: itemCost ? parseFloat(itemCost) : 0,
-        itemIsModified: positionData.itemIsModified,
+        itemSalesPrice: parseFloat(itemSalesPrice),
+        itemSalesDiscount: parseFloat(itemSalesDiscount),
+        itemCost: parseInt(itemCost),
+        itemIsModified: false,
       }),
     });
     const data: ApplyResponse = await response.json();
@@ -126,8 +102,8 @@ export default function EditItem() {
       setErrors(data.errors);
       return;
     }
-    if (data.isEdited) {
-      router.replace(`./mainOffer?offerDefinedId=${data.offerDefinedId}`);
+    if (data.isAdded) {
+      router.replace(`./mainOffer?offerDefinedId=${offerDefinedId}`);
     } else {
       console.log('Failed to update position');
     }
@@ -258,8 +234,8 @@ export default function EditItem() {
         </Pressable>
       </View>
       <View style={styles.applyButtonConainer}>
-        <Pressable style={styles.applyButton} onPress={() => applyChanges()}>
-          <Text style={styles.applyButtonText}>Apply</Text>
+        <Pressable style={styles.applyButton} onPress={() => addPosition()}>
+          <Text style={styles.applyButtonText}>Add Position</Text>
         </Pressable>
       </View>
     </View>

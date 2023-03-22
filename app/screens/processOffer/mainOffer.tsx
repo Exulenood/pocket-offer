@@ -56,6 +56,7 @@ type PositionDataResponseBody =
       }[];
       creationDate: string;
       clientName: string;
+      maxExistingPosId: { max: string };
     };
 
 export default function UserProfileAndSettings() {
@@ -84,6 +85,7 @@ export default function UserProfileAndSettings() {
   const [creationDate, setCreationDate] = useState<string>('');
   const [clientName, setClientName] = useState<string>('');
   const [offerDefIdTitle, setOfferDefIdTitle] = useState<string>('');
+  const [maxExistingPosId, setMaxExistingPosId] = useState<string>('');
 
   function renderItem(item: { item: PositionDataResponse }) {
     const position = item.item;
@@ -182,6 +184,7 @@ export default function UserProfileAndSettings() {
       setPositionData(data.offerPositions);
       setCreationDate(data.creationDate);
       setClientName(data.clientName);
+      setMaxExistingPosId(data.maxExistingPosId.max);
       setOfferDefIdTitle(`Offer ${offerDefinedId}`);
     }
     getPositions().catch((error) => console.error(error));
@@ -221,7 +224,14 @@ export default function UserProfileAndSettings() {
         />
       </View>
       <View style={styles.addButtonContainer}>
-        <Pressable style={styles.addButton}>
+        <Pressable
+          style={styles.addButton}
+          onPress={() =>
+            router.push(
+              `./addItem/?newPosition={"offerDefinedId":"${offerDefinedId}","maxPositionId":"${maxExistingPosId}"}`,
+            )
+          }
+        >
           <Text style={styles.addButtonText}>Add new item</Text>
         </Pressable>
       </View>
@@ -230,7 +240,7 @@ export default function UserProfileAndSettings() {
           style={styles.bottomMenuNegButton}
           onPress={() => router.push('../home')}
         >
-          <Text style={styles.bottomMenuButtonText}>Cancel</Text>
+          <Text style={styles.bottomMenuButtonText}>Back</Text>
         </Pressable>
         <Pressable style={styles.bottomMenuPosButton}>
           <Text style={styles.bottomMenuButtonText}>Pricing</Text>
@@ -255,6 +265,7 @@ const styles = StyleSheet.create({
   headContainer: {
     height: 150,
     marginTop: 40,
+    marginBottom: 5,
     width: '80%',
     alignItems: 'center',
   },
@@ -347,6 +358,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     columnGap: 3,
+    marginBottom: 10,
     backgroundColor: '#FFF',
   },
   positionIdContainer: {

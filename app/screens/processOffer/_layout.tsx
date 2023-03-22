@@ -38,6 +38,15 @@ export default function Layout() {
           headerTitle: 'Edit Item',
         }}
       />
+      <Stack.Screen
+        name="addItem"
+        options={{
+          presentation: 'modal',
+          title: 'Add Item',
+          animation: 'slide_from_right',
+          headerTitle: 'Add Item',
+        }}
+      />
     </Stack>
   );
 }
