@@ -49,7 +49,7 @@ export default function Home() {
           <Text style={styles.squareButtonText}>Create new Offer</Text>
         </Pressable>
         <Pressable
-          onPress={() => router.push('./openExistingOffer')}
+          onPress={() => router.push('./openExistingOffer/openOffer')}
           style={styles.squareButton}
         >
           <Text style={styles.squareButtonText}>Open existing Offer</Text>

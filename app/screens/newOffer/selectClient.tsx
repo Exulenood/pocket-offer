@@ -50,12 +50,12 @@ type ClientDataResponseBody =
     };
 
 export default function ClientListModal() {
-  const { selectRefresh } = useSearchParams();
   const router = useRouter();
   const [errors, setErrors] = useState<{ message: string }[]>([]);
   const [maxClientDefinedId, setMaxClientDefinedId] = useState<number>(0);
   const [definedIdFilterValue, setDefinedIdFilterValue] = useState<string>('');
   const [lastNameFilterValue, setLastNameFilterValue] = useState<string>('');
+  const [refresh, setRefresh] = useState<boolean>(false);
   const [clientData, setClientData] = useState<ClientDataResponse[]>([
     {
       id: '',
@@ -156,6 +156,56 @@ export default function ClientListModal() {
   }
 
   useEffect(() => {
+    if (!definedIdFilterValue) {
+      if (refresh) {
+        setRefresh(false);
+      } else {
+        setRefresh(true);
+      }
+    } else {
+      function findMatch(item: ClientDataResponse) {
+        if (item.clientDefinedId === parseInt(definedIdFilterValue)) {
+          return true;
+        }
+      }
+      const doesExist = clientData.find(findMatch);
+      if (doesExist) {
+        function filterById(item: ClientDataResponse) {
+          if (item.clientDefinedId === parseInt(definedIdFilterValue)) {
+            return true;
+          }
+        }
+        setClientData(clientData.filter(filterById));
+      }
+    }
+  }, [definedIdFilterValue]);
+
+  useEffect(() => {
+    if (!lastNameFilterValue) {
+      if (refresh) {
+        setRefresh(false);
+      } else {
+        setRefresh(true);
+      }
+    } else {
+      function findMatch(item: ClientDataResponse) {
+        if (item.clientLastName === lastNameFilterValue) {
+          return true;
+        }
+      }
+      const doesExist = clientData.find(findMatch);
+      if (doesExist) {
+        function filterById(item: ClientDataResponse) {
+          if (item.clientLastName === lastNameFilterValue) {
+            return true;
+          }
+        }
+        setClientData(clientData.filter(filterById));
+      }
+    }
+  }, [lastNameFilterValue]);
+
+  useEffect(() => {
     async function getClients() {
       const sessionToken = await SecureStore.getItemAsync('sessionToken');
       const sessionSecret = await SecureStore.getItemAsync('sessionSecret');
@@ -187,7 +237,24 @@ export default function ClientListModal() {
       setMaxClientDefinedId(data.maxClientDefinedId);
     }
     getClients().catch((error) => console.error(error));
-  }, [definedIdFilterValue, lastNameFilterValue]);
+
+    if (definedIdFilterValue) {
+      function filterById(item: ClientDataResponse) {
+        if (item.id === definedIdFilterValue) {
+          return true;
+        }
+      }
+      setClientData(clientData.filter(filterById));
+    }
+    if (lastNameFilterValue) {
+      function filterById(item: ClientDataResponse) {
+        if (item.clientLastName === lastNameFilterValue) {
+          return true;
+        }
+      }
+      setClientData(clientData.filter(filterById));
+    }
+  }, [refresh]);
 
   function dismissModalAndRouteToAddClient() {
     router.replace({

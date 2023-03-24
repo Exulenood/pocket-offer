@@ -18,7 +18,7 @@ export default function AuthWrap() {
     if (home) {
       setMessageText('WELCOME');
     } else if (offer) {
-      setMessageText('CREATING OFFER');
+      setMessageText('LOADING OFFER');
     }
     async function revalidateOnRoute() {
       const tokenForValidation = await SecureStore.getItemAsync('sessionToken');
