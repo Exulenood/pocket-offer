@@ -47,6 +47,15 @@ export default function Layout() {
           headerTitle: 'Add Item',
         }}
       />
+      <Stack.Screen
+        name="selectTemplateItem"
+        options={{
+          presentation: 'modal',
+          title: 'Select Template',
+          animation: 'slide_from_right',
+          headerTitle: 'Select Template',
+        }}
+      />
     </Stack>
   );
 }

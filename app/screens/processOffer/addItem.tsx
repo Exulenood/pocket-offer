@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { apiUrl, colors } from '../../../globals/globalDataAndDefinitions';
+import { PositionData } from './editItem';
 
 type ApplyResponse =
   | {
@@ -25,24 +26,42 @@ type ApplyResponse =
       offerDefinedId: string;
     };
 
-type PositionData = {
-  offerDefinedId: string;
-  maxPositionId: string;
-};
+type SaveTemplateResponse =
+  | {
+      errors: {
+        message: string;
+      }[];
+    }
+  | {
+      isAdded: boolean;
+      newTemplateItemRow: string;
+    };
 
 export default function AddItem() {
-  const { newPosition } = useSearchParams();
+  const { position } = useSearchParams();
   const router = useRouter();
   const [errors, setErrors] = useState<{ message: string }[]>([]);
   const [positionData, setPositionData] = useState<PositionData>({
+    offerRowId: '',
     offerDefinedId: '',
     maxPositionId: '',
+    positionId: '',
+    quantity: '1',
+    quantityUnit: 'pc',
+    positionIsOptional: false,
+    itemId: '',
+    itemTitle: '',
+    itemText: '',
+    itemSalesPrice: '0',
+    itemSalesDiscount: '0',
+    itemCost: '0',
+    itemIsModified: false,
   });
   const [offerDefinedId, setOfferDefinedId] = useState<string>('');
   const [positionNumber, setPositionNumber] = useState<string>('');
   const [quantity, setQuantity] = useState<string>('1');
   const [quantityUnit, setQuantityUnit] = useState<string>('pc');
-  const [isOptional, setIsOptional] = useState<boolean>(true);
+  const [isOptional, setIsOptional] = useState<boolean>(false);
   const [itemId, setItemId] = useState<string>('');
   const [itemTitle, setItemTitle] = useState<string>('');
   const [itemText, setItemText] = useState<string>('');
@@ -51,21 +70,47 @@ export default function AddItem() {
   const [itemSalesDiscount, setItemSalesDiscount] = useState<string>('0');
 
   useEffect(() => {
-    if (newPosition) {
-      const data = JSON.parse(newPosition);
-      setPositionData(data);
-    }
-  }, []);
+    if (position) {
+      const data = JSON.parse(position);
 
-  useEffect(() => {
-    if (positionData.maxPositionId) {
-      const maxPosId = parseInt(positionData.maxPositionId) + 10;
-      setPositionNumber(maxPosId.toString());
-    } else {
-      setPositionNumber('1');
+      if (data.offerRowId === 'new') {
+        setOfferDefinedId(data.offerDefinedId);
+        setPositionNumber(data.positionId);
+        setItemId(data.itemId);
+        setItemTitle(data.itemTitle);
+        setItemText(data.itemText);
+        setItemSalesPrice(data.itemSalesPrice);
+        setItemCost(data.itemCost);
+      } else {
+        const maxPosId = parseInt(data.maxPositionId) + 10;
+        setPositionNumber(maxPosId.toString());
+
+        setOfferDefinedId(data.offerDefinedId);
+      }
     }
-    setOfferDefinedId(positionData.offerDefinedId);
-  }, [positionData]);
+  }, [position]);
+
+  // useEffect(() => {
+  //   const data = JSON.parse(position);
+  //   setPositionData(data);
+  // }, [position]);
+
+  // useEffect(() => {
+  //   if (positionData.maxPositionId) {
+  //     const maxPosId = parseInt(positionData.maxPositionId) + 10;
+  //     setPositionNumber(maxPosId.toString());
+  //   }
+  //   setOfferDefinedId(positionData.offerDefinedId);
+  //   setPositionNumber(positionData.positionId);
+  //   setQuantity(positionData.quantity);
+  //   setQuantityUnit(positionData.quantityUnit);
+  //   setIsOptional(positionData.positionIsOptional);
+  //   setItemId(positionData.itemId);
+  //   setItemTitle(positionData.itemTitle);
+  //   setItemText(positionData.itemText);
+  //   setItemCost(positionData.itemCost);
+  //   setItemSalesPrice(positionData.itemSalesPrice);
+  // }, [positionData]);
 
   async function addPosition() {
     const sessionToken = await SecureStore.getItemAsync('sessionToken');
@@ -107,6 +152,59 @@ export default function AddItem() {
     } else {
       console.log('Failed to update position');
     }
+  }
+
+  async function saveTemplateItem() {
+    const sessionToken = await SecureStore.getItemAsync('sessionToken');
+    const sessionSecret = await SecureStore.getItemAsync('sessionSecret');
+    const keyObject = JSON.stringify({
+      keyA: sessionToken,
+      keyB: sessionSecret,
+    });
+    console.log(keyObject);
+    const response = await fetch(`${apiUrl}/addTemplateItem`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: keyObject,
+      },
+      body: JSON.stringify({
+        itemId: itemId ? itemId : '',
+        itemTitle: itemTitle ? itemTitle : '',
+        itemText: itemText ? itemText : '',
+        itemSalesPrice: itemSalesPrice ? parseFloat(itemSalesPrice) : 0,
+        itemCost: itemCost ? parseFloat(itemCost) : 0,
+      }),
+    });
+    const data: SaveTemplateResponse = await response.json();
+
+    if ('errors' in data) {
+      setErrors(data.errors);
+      return;
+    }
+    if (!data.isAdded) {
+      console.log('Failed to add Template');
+    } else {
+      Alert.alert('Success', `Item has been added to your templates list`, [
+        { text: 'OK', onPress: () => null },
+      ]);
+    }
+  }
+
+  function passToLoadTemplate() {
+    const data = JSON.stringify({
+      toOrigin: 'addItem',
+      offerRowId: '',
+      offerDefinedId: offerDefinedId,
+      positionId: positionNumber,
+    });
+    console.log(data);
+    router.push({
+      pathname: './selectTemplateItem',
+      params: {
+        originData: data,
+      },
+    });
   }
 
   return (
@@ -222,13 +320,13 @@ export default function AddItem() {
       <View style={styles.templateButtonContainer}>
         <Pressable
           style={styles.templateButton}
-          onPress={() => router.push('../home')}
+          onPress={() => passToLoadTemplate()}
         >
           <Text style={styles.templateButtonText}>Load Template</Text>
         </Pressable>
         <Pressable
           style={styles.templateButton}
-          onPress={() => router.push('../home')}
+          onPress={() => saveTemplateItem()}
         >
           <Text style={styles.templateButtonText}>Save Template</Text>
         </Pressable>

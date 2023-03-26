@@ -133,6 +133,8 @@ export default function UserProfileAndSettings() {
     const position = item.item;
     const data = JSON.stringify({
       offerRowId: position.id,
+      offerDefinedId: position.offerDefinedId,
+      maxPositionId: '',
       positionId: position.positionId,
       quantity: position.quantity ? position.quantity.toString() : '1',
       quantityUnit: position.quantityUnit ? position.quantityUnit : 'pc',
@@ -234,6 +236,31 @@ export default function UserProfileAndSettings() {
     getPositions().catch((error) => console.error(error));
   }, [refresh]);
 
+  function passToAddPosition() {
+    const data = JSON.stringify({
+      offerRowId: '',
+      offerDefinedId: offerDefinedId,
+      maxPositionId: maxExistingPosId,
+      positionId: '',
+      quantity: '1',
+      quantityUnit: 'pc',
+      positionIsOptional: false,
+      itemId: '-',
+      itemTitle: '',
+      itemText: '',
+      itemSalesPrice: '',
+      itemSalesDiscount: '',
+      itemCost: '',
+      itemIsModified: false,
+    });
+    router.push({
+      pathname: './addItem',
+      params: {
+        position: data,
+      },
+    });
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.headContainer}>
@@ -268,14 +295,7 @@ export default function UserProfileAndSettings() {
         />
       </View>
       <View style={styles.addButtonContainer}>
-        <Pressable
-          style={styles.addButton}
-          onPress={() =>
-            router.push(
-              `./addItem/?newPosition={"offerDefinedId":"${offerDefinedId}","maxPositionId":"${maxExistingPosId}"}`,
-            )
-          }
-        >
+        <Pressable style={styles.addButton} onPress={() => passToAddPosition()}>
           <Text style={styles.addButtonText}>Add new item</Text>
         </Pressable>
       </View>

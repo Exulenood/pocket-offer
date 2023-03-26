@@ -119,7 +119,9 @@ export default function OpenOffer() {
             <Text style={styles.itemClientText}>{offer.offerTitle}</Text>
           </View>
           <View style={styles.lowerClientLinkContainer}>
-            <Text style={styles.itemIdAndDateText}>{offer.offerDefinedId}</Text>
+            <Text style={styles.itemIdAndDateText}>
+              {offer.offerDefinedId ? offer.offerDefinedId : ''}
+            </Text>
             <Text style={styles.itemIdAndDateText}>{offer.dateOfCreation}</Text>
           </View>
         </Pressable>
@@ -406,7 +408,7 @@ const styles = StyleSheet.create({
   lowerClientLinkContainer: {
     flex: 1,
     flexDirection: 'row',
-    width: '100%',
+    width: '98%',
     justifyContent: 'space-between',
   },
   itemIdAndDateText: {

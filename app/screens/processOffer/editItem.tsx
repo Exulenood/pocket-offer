@@ -25,8 +25,21 @@ type ApplyResponse =
       offerDefinedId: string;
     };
 
-type PositionData = {
+type SaveTemplateResponse =
+  | {
+      errors: {
+        message: string;
+      }[];
+    }
+  | {
+      isAdded: boolean;
+      newTemplateItemRow: string;
+    };
+
+export type PositionData = {
   offerRowId: string;
+  offerDefinedId: string;
+  maxPositionId: string;
   positionId: string;
   quantity: string;
   quantityUnit: string;
@@ -46,6 +59,8 @@ export default function EditItem() {
   const [errors, setErrors] = useState<{ message: string }[]>([]);
   const [positionData, setPositionData] = useState<PositionData>({
     offerRowId: '',
+    offerDefinedId: '',
+    maxPositionId: '',
     positionId: '',
     quantity: '',
     quantityUnit: '',
@@ -74,7 +89,7 @@ export default function EditItem() {
       const data = JSON.parse(position);
       setPositionData(data);
     }
-  }, []);
+  }, [position]);
 
   useEffect(() => {
     setPositionNumber(positionData.positionId);
@@ -131,6 +146,57 @@ export default function EditItem() {
     } else {
       console.log('Failed to update position');
     }
+  }
+
+  async function saveTemplateItem() {
+    const sessionToken = await SecureStore.getItemAsync('sessionToken');
+    const sessionSecret = await SecureStore.getItemAsync('sessionSecret');
+    const keyObject = JSON.stringify({
+      keyA: sessionToken,
+      keyB: sessionSecret,
+    });
+    console.log(keyObject);
+    const response = await fetch(`${apiUrl}/addTemplateItem`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: keyObject,
+      },
+      body: JSON.stringify({
+        itemId: itemId ? itemId : '',
+        itemTitle: itemTitle ? itemTitle : '',
+        itemText: itemText ? itemText : '',
+        itemSalesPrice: itemSalesPrice ? parseFloat(itemSalesPrice) : 0,
+        itemCost: itemCost ? parseFloat(itemCost) : 0,
+      }),
+    });
+    const data: SaveTemplateResponse = await response.json();
+
+    if ('errors' in data) {
+      setErrors(data.errors);
+      return;
+    }
+    if (!data.isAdded) {
+      console.log('Failed to add Template');
+    } else {
+      Alert.alert('Success', `Item has been added to your templates list`, [
+        { text: 'OK', onPress: () => null },
+      ]);
+    }
+  }
+
+  function passToLoadTemplate() {
+    const data = JSON.stringify({
+      toOrigin: 'editItem',
+      offerRowId: positionData.offerRowId,
+      positionId: positionData.positionId,
+    });
+    router.push({
+      pathname: './selectTemplateItem',
+      params: {
+        originData: data,
+      },
+    });
   }
 
   return (
@@ -246,13 +312,13 @@ export default function EditItem() {
       <View style={styles.templateButtonContainer}>
         <Pressable
           style={styles.templateButton}
-          onPress={() => router.push('../home')}
+          onPress={() => passToLoadTemplate()}
         >
           <Text style={styles.templateButtonText}>Load Template</Text>
         </Pressable>
         <Pressable
           style={styles.templateButton}
-          onPress={() => router.push('../home')}
+          onPress={() => saveTemplateItem()}
         >
           <Text style={styles.templateButtonText}>Save Template</Text>
         </Pressable>
