@@ -80,7 +80,7 @@ export default function SelectTemplateItem() {
   const [itemIdFilterValue, setItemIdFilterValue] = useState<string>('');
   const [titleFilterValue, setTitleFilterValue] = useState<string>('');
 
-  async function deleteTemplateItem(templateItemRowId: string) {
+  async function deleteTemplateItem(templateItemRowId: number) {
     const sessionToken = await SecureStore.getItemAsync('sessionToken');
     const sessionSecret = await SecureStore.getItemAsync('sessionSecret');
     const keyObject = JSON.stringify({
@@ -99,14 +99,14 @@ export default function SelectTemplateItem() {
       }),
     });
     function filterById(item: TemplateItemDataResponse) {
-      if (item.id !== parseInt(templateItemRowId)) {
+      if (item.id !== templateItemRowId) {
         return true;
       }
     }
     setTemplateItemData(templateItemData.filter(filterById));
   }
 
-  function deleteTemplateItemAlert(templateItemRowId: string, title: string) {
+  function deleteTemplateItemAlert(templateItemRowId: number, title: string) {
     Alert.alert(
       'Deleting Client',
       `Are you sure you want to delete Item ${title}? \n (This action cannot be undone)`,

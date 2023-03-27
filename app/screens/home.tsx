@@ -65,7 +65,7 @@ export default function Home() {
 
         <Pressable
           style={styles.bottomMenuPosButton}
-          onPress={() => router.push('./userProfileAndSettings')}
+          onPress={() => router.push('./userProfile/userProfile')}
         >
           <Text style={styles.bottomMenuButtonText}>
             User Profile / Settings
