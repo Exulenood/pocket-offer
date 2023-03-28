@@ -309,7 +309,12 @@ export default function UserProfileAndSettings() {
         <Pressable style={styles.bottomMenuPosButton}>
           <Text style={styles.bottomMenuButtonText}>Pricing</Text>
         </Pressable>
-        <Pressable style={styles.bottomMenuPosButton}>
+        <Pressable
+          style={styles.bottomMenuPosButton}
+          onPress={() =>
+            router.push(`../finishOffer/finishOffer?offer=${offerDefinedId}`)
+          }
+        >
           <Text style={styles.bottomMenuButtonText}>{'Finish \nOffer'}</Text>
         </Pressable>
       </View>
