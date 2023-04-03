@@ -1,6 +1,4 @@
 export const apiUrl: string = 'http://192.168.0.141:3000/api';
-// export const apiUrl: string = 'http://192.168.0.59:3000/api';
-// export const apiUrl: string = 'http://192.168.43.249:3000/api'
 
 export const colors = {
   patternColorA: '#4761C2',

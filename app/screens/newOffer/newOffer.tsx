@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-restricted-syntax */
-import { Link, useNavigation, useRouter, useSearchParams } from 'expo-router';
+import { Link, useRouter, useSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
-import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
@@ -61,8 +62,6 @@ export default function NewOffer() {
   const [offerTitle, setOfferTitle] = useState<string>('');
   const [offerDefinedId, setOfferDefinedId] = useState<string>('');
   const [selectedDefClientId, setSelectedDefClientId] = useState<string>('');
-
-  // const [offerTitle, setOfferTitle] = useState<string>('')
 
   useEffect(() => {
     async function getMaxDefinedOfferId() {
@@ -128,9 +127,14 @@ export default function NewOffer() {
   useEffect(() => {
     if (client) {
       setSelectedClientData(JSON.parse(client));
-      setSelectedDefClientId(`Client Id: ${selectedClientData.definedId}`);
     }
   }, [client]);
+
+  useEffect(() => {
+    if (selectedClientData) {
+      setSelectedDefClientId(`Client Id: ${selectedClientData.definedId}`);
+    }
+  }, [selectedClientData]);
 
   async function createOffer() {
     const sessionToken = await SecureStore.getItemAsync('sessionToken');

@@ -7,7 +7,7 @@ import {
   NotoSans_600SemiBold,
   NotoSans_800ExtraBold,
 } from '@expo-google-fonts/noto-sans';
-import { Slot, SplashScreen, Stack } from 'expo-router';
+import { SplashScreen, Stack } from 'expo-router';
 
 export default function Layout() {
   const [fontsLoaded] = useFonts({

@@ -1,20 +1,18 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-restricted-syntax */
-import { Link, useNavigation, useRouter, useSearchParams } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
   FlatList,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import { apiUrl, colors } from '../../../globals/globalDataAndDefinitions';
-
-// import ClientItems from './clientItems';
 
 export type ClientDataResponse = {
   id: string;
@@ -151,8 +149,6 @@ export default function ClientListModal() {
         </View>
       </View>
     );
-
-    // return <ClientItems client={item.item} />;
   }
 
   useEffect(() => {

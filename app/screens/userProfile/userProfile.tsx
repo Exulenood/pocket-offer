@@ -1,9 +1,8 @@
-import { Link, useNavigation, useRouter, useSearchParams } from 'expo-router';
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import {
-  Alert,
-  FlatList,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -275,12 +274,6 @@ export default function UserProfile() {
   );
 }
 
-// style={styles.inputsScrollview}
-
-// //
-// borderWidth: 2,
-// borderColor: 'red',
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -300,12 +293,7 @@ const styles = StyleSheet.create({
     color: colors.patternColorD,
     textAlign: 'center',
   },
-  // inputsContainer: {
-  //   flex: 6.5,
-  //   width: '80%',
-  //   justifyContent: 'center',
-  //   alignItems: 'center',
-  // },
+
   inputsScrollview: {
     flex: 6.5,
     width: '80%',

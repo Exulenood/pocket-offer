@@ -1,9 +1,8 @@
-import { Link, useNavigation, useRouter, useSearchParams } from 'expo-router';
+import { useRouter, useSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
-  FlatList,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -139,6 +138,7 @@ export default function EditItem() {
 
     if ('errors' in data) {
       setErrors(data.errors);
+      console.log(errors);
       return;
     }
     if (data.isEdited) {
@@ -331,10 +331,6 @@ export default function EditItem() {
     </View>
   );
 }
-
-// <View></View>
-// <Text></Text>
-// style={styles.inputLabelText}
 
 const styles = StyleSheet.create({
   container: {

@@ -1,9 +1,8 @@
-import { Link, useNavigation, useRouter, useSearchParams } from 'expo-router';
+import { useRouter, useSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
-  FlatList,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -13,7 +12,6 @@ import {
 } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { apiUrl, colors } from '../../../globals/globalDataAndDefinitions';
-import { PositionData } from './editItem';
 
 type ApplyResponse =
   | {
@@ -41,22 +39,6 @@ export default function AddItem() {
   const { position } = useSearchParams();
   const router = useRouter();
   const [errors, setErrors] = useState<{ message: string }[]>([]);
-  const [positionData, setPositionData] = useState<PositionData>({
-    offerRowId: '',
-    offerDefinedId: '',
-    maxPositionId: '',
-    positionId: '',
-    quantity: '1',
-    quantityUnit: 'pc',
-    positionIsOptional: false,
-    itemId: '',
-    itemTitle: '',
-    itemText: '',
-    itemSalesPrice: '0',
-    itemSalesDiscount: '0',
-    itemCost: '0',
-    itemIsModified: false,
-  });
   const [offerDefinedId, setOfferDefinedId] = useState<string>('');
   const [positionNumber, setPositionNumber] = useState<string>('');
   const [quantity, setQuantity] = useState<string>('1');
@@ -89,28 +71,6 @@ export default function AddItem() {
       }
     }
   }, [position]);
-
-  // useEffect(() => {
-  //   const data = JSON.parse(position);
-  //   setPositionData(data);
-  // }, [position]);
-
-  // useEffect(() => {
-  //   if (positionData.maxPositionId) {
-  //     const maxPosId = parseInt(positionData.maxPositionId) + 10;
-  //     setPositionNumber(maxPosId.toString());
-  //   }
-  //   setOfferDefinedId(positionData.offerDefinedId);
-  //   setPositionNumber(positionData.positionId);
-  //   setQuantity(positionData.quantity);
-  //   setQuantityUnit(positionData.quantityUnit);
-  //   setIsOptional(positionData.positionIsOptional);
-  //   setItemId(positionData.itemId);
-  //   setItemTitle(positionData.itemTitle);
-  //   setItemText(positionData.itemText);
-  //   setItemCost(positionData.itemCost);
-  //   setItemSalesPrice(positionData.itemSalesPrice);
-  // }, [positionData]);
 
   async function addPosition() {
     const sessionToken = await SecureStore.getItemAsync('sessionToken');
@@ -145,6 +105,7 @@ export default function AddItem() {
 
     if ('errors' in data) {
       setErrors(data.errors);
+      console.log(errors);
       return;
     }
     if (data.isAdded) {
@@ -339,10 +300,6 @@ export default function AddItem() {
     </View>
   );
 }
-
-// <View></View>
-// <Text></Text>
-// style={styles.inputLabelText}
 
 const styles = StyleSheet.create({
   container: {

@@ -1,20 +1,18 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-restricted-syntax */
-import { Link, useNavigation, useRouter, useSearchParams } from 'expo-router';
+import { useRouter, useSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
   FlatList,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import { apiUrl, colors } from '../../../globals/globalDataAndDefinitions';
-
-// import ClientItems from './clientItems';
 
 export type TemplateItemDataResponse = {
   id: number;
@@ -71,11 +69,6 @@ export default function SelectTemplateItem() {
     offerDefinedId: '',
     positionId: '',
   });
-  const [itemId, setItemId] = useState<string>('');
-  const [itemTitle, setItemTitle] = useState<string>('');
-  const [itemText, setItemText] = useState<string>('');
-  const [itemCost, setItemCost] = useState<string>('0');
-  const [itemSalesPrice, setItemSalesPrice] = useState<string>('0');
   const [refresh, setRefresh] = useState<boolean>(false);
   const [itemIdFilterValue, setItemIdFilterValue] = useState<string>('');
   const [titleFilterValue, setTitleFilterValue] = useState<string>('');
@@ -258,7 +251,7 @@ export default function SelectTemplateItem() {
             <Text style={styles.itemInfoText}>{template.itemText}</Text>
             <Text
               style={styles.itemInfoText}
-            >{`Sales Price: €${template.itemSalesPrice} / Item Cost: €${template.itemCost}`}</Text>
+            >{`Sales Price: €${template.itemSalesPrice} / Cost: €${template.itemCost}`}</Text>
             <Text
               style={styles.itemIdText}
             >{`Item Id: ${template.itemId}`}</Text>
@@ -278,8 +271,6 @@ export default function SelectTemplateItem() {
         </View>
       </View>
     );
-
-    // return <ClientItems client={item.item} />;
   }
 
   return (
@@ -294,7 +285,7 @@ export default function SelectTemplateItem() {
         />
         <TextInput
           style={styles.textInputField}
-          placeholder="Search for last Name"
+          placeholder="Search for designation"
           onChangeText={setTitleFilterValue}
           value={titleFilterValue}
         />
@@ -311,8 +302,6 @@ export default function SelectTemplateItem() {
     </View>
   );
 }
-
-// style={styles.addButtonText}
 
 const styles = StyleSheet.create({
   container: {
@@ -371,7 +360,7 @@ const styles = StyleSheet.create({
     textAlign: 'left',
     color: colors.patternColorD,
     fontFamily: 'NotoSans_400Regular',
-    fontSize: 15,
+    fontSize: 14,
   },
   itemIdText: {
     textAlign: 'left',

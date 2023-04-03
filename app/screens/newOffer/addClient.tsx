@@ -1,9 +1,9 @@
-import { Link, useNavigation, useRouter, useSearchParams } from 'expo-router';
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useRouter, useSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
-  FlatList,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -96,8 +96,6 @@ export default function ClientListModal() {
       keyB: sessionSecret,
     });
     console.log(`Object: ${keyObject}`);
-    // console.log(`token: ${sessionToken}`);
-    // console.log(`secret: ${sessionSecret}`);
 
     const response = await fetch(`${apiUrl}/createClient`, {
       method: 'POST',
@@ -135,12 +133,6 @@ export default function ClientListModal() {
       }
       return;
     }
-    // console.log(`Id: ${data.client.clientId}`);
-    // console.log(`CI: ${data.client.clientDefinedId}`);
-    // console.log(`FN: ${data.client.clientFirstName}`);
-    // console.log(`LN: ${data.client.clientLastName}`);
-    // console.log(`PC: ${data.client.clientAddrPostCode}`);
-    // console.log(`LO: ${data.client.clientAddLocality}`);
 
     router.replace({
       pathname: './newOffer',
@@ -306,12 +298,6 @@ export default function ClientListModal() {
     </View>
   );
 }
-
-// style={styles.inputsScrollview}
-
-// //
-// borderWidth: 2,
-// borderColor: 'red',
 
 const styles = StyleSheet.create({
   container: {

@@ -1,13 +1,12 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-restricted-syntax */
 import { printToFileAsync } from 'expo-print';
-import { Link, useNavigation, useRouter, useSearchParams } from 'expo-router';
+import { useRouter, useSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { shareAsync } from 'expo-sharing';
-import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useState } from 'react';
 import {
   Alert,
-  BackHandler,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -202,8 +201,6 @@ export default function NewOffer() {
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const [totalPriceInclVAT, setTotalPriceInclVAT] = useState<number>(0);
   const [vATValue, setVATValue] = useState<number>(0);
-
-  // const [offerTitle, setOfferTitle] = useState<string>('')
 
   useEffect(() => {
     if (offer) {

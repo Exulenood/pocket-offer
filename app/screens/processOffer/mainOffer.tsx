@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-restricted-syntax */
-import { Link, useRouter, useSearchParams } from 'expo-router';
+import { useRouter, useSearchParams } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from 'react';
 import {
@@ -8,7 +9,6 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native';
 import { apiUrl, colors } from '../../../globals/globalDataAndDefinitions';
@@ -322,8 +322,6 @@ export default function UserProfileAndSettings() {
   );
 }
 
-// style={styles.deleteButton}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -402,7 +400,6 @@ const styles = StyleSheet.create({
     columnGap: 3,
   },
   columnAContainer: {
-    // flex: 1,
     width: 45,
     justifyContent: 'flex-end',
     backgroundColor: colors.patternColorE,
@@ -421,7 +418,6 @@ const styles = StyleSheet.create({
     width: '100%',
   },
 
-  // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
   positionContainer: {
     width: '100%',
     flex: 1,
@@ -569,11 +565,3 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
 });
-
-// headContainer: {
-
-// },
-
-//
-// borderWidth: 2,
-// borderColor: 'red'

@@ -1,4 +1,5 @@
-import { useRouter, useSearchParams } from 'expo-router';
+/* eslint-disable react/style-prop-object */
+import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect } from 'react';
 import {
@@ -75,8 +76,6 @@ export default function Home() {
     </View>
   );
 }
-
-// style={styles.bottomMenuButtonContainer}
 
 const styles = StyleSheet.create({
   container: {

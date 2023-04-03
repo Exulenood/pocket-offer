@@ -1,3 +1,4 @@
+/* eslint-disable react/style-prop-object */
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { StatusBar } from 'expo-status-bar';
@@ -48,7 +49,6 @@ export default function Index() {
     const sessionToken = await SecureStore.getItemAsync('sessionToken');
 
     if (loggedInAs === data.user.username && sessionToken === data.user.token) {
-      // router.replace(`/loginAndAuth/authorization?reroute=../screens/home`);
       router.replace({
         pathname: '/loginAndAuth/authorization',
         params: {
