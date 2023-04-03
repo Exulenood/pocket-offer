@@ -29,44 +29,44 @@ The application uses the API and the database setup of the backend-application "
 
 #### Login Screen
 
-![LoginScreen](.\public\images\screenshots\01LoginScreen.png)
+![LoginScreen](./public/images/screenshots/01LoginScreen.png)
 
 #### Home Screen
 
-![HomeScreen](.\public\images\screenshots\02HomeScreen.png)
+![HomeScreen](./public/images/screenshots/02HomeScreen.png)
 
 #### Offer Creation Screen
 
-![OfferCreationScreen](.\public\images\screenshots\03OfferCreationScreen.png)
+![OfferCreationScreen](./public/images/screenshots/03OfferCreationScreen.png)
 
 #### Select Client Screen
 
-![SelectClientScreen](.\public\images\screenshots\04SelectClientScreen.png)
+![SelectClientScreen](./public/images/screenshots/04SelectClientScreen.png)
 
 #### Add Client Screen
 
-![AddClientScreen](.\public\images\screenshots\05AddClientScreen.png)
+![AddClientScreen](./public/images/screenshots/05AddClientScreen.png)
 
 #### Main Offer Screen
 
-![MainOfferScreen](.\public\images\screenshots\06MainOfferScreen.png)
+![MainOfferScreen](./public/images/screenshots/06MainOfferScreen.png)
 
 #### Add Item Screen
 
-![AddItemScreen](.\public\images\screenshots\07AddItemScreen.png)
+![AddItemScreen](./public/images/screenshots/07AddItemScreen.png)
 
 #### Item Templates Screen
 
-![ItemTemplatesScreen](.\public\images\screenshots\08ItemTemplatesScreen.png)
+![ItemTemplatesScreen](./public/images/screenshots/08ItemTemplatesScreen.png)
 
 #### Finish Offer Screen
 
-![FinishOfferScreen](.\public\images\screenshots\09FinishOfferScreen.png)
+![FinishOfferScreen](./public/images/screenshots/09FinishOfferScreen.png)
 
 #### Existing Offer Screen
 
-![ExistingOfferScreen](.\public\images\screenshots\10ExistingOffers.png)
+![ExistingOfferScreen](./public/images/screenshots/10ExistingOffers.png)
 
 #### Created pdf
 
-![CreatedPdf](.\public\images\screenshots\11CreatedPdf.png)
+![CreatedPdf](./public/images/screenshots/11CreatedPdf.png)
